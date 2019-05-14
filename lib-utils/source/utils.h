@@ -1,5 +1,5 @@
 //#############################################################################
-//  File:      utils.h
+//  File:      Utils.h
 //  Author:    Marcus Hudritsch
 //  Date:      May 2019
 //  Codestyle: https://github.com/cpvrlab/SLProject/wiki/Coding-Style-Guidelines

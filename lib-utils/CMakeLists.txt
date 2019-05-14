@@ -1,18 +1,20 @@
 # 
-# CMake configuration for lib-utils
+# CMake configuration for lib-Utils
 #
 
-set(target lib-utils)
+set(target lib-Utils)
 
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}")
+set(platform_specific_link_libraries)
+set(platform_specific_include_directories)
 
 file(GLOB headers
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
     )
 
 file(GLOB sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
 )
 
 
@@ -41,10 +43,7 @@ add_library(${target}
     ${sources}
     )
 
-add_library(${META_PROJECT_NAME}::${target}
-    ALIAS
-    ${target}
-    )
+add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 set_target_properties(${target}
     PROPERTIES
@@ -76,10 +75,12 @@ target_compile_options(${target}
     PRIVATE
 
     PUBLIC
-    ${DEFAULT_COMPILE_OPTIONS}
+    ${EXTERNAL_LIB_COMPILE_OPTIONS}
 
     INTERFACE
     )
+
+include(${UTILS_ROOT}/cmake/PlatformLinkLibs.cmake)
 
 target_link_libraries(${target}
     PRIVATE

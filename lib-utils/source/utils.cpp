@@ -1,5 +1,5 @@
 //#############################################################################
-//  File:      utils.cpp
+//  File:      Utils.cpp
 //  Author:    Marcus Hudritsch
 //  Date:      May 2019
 //  Codestyle: https://github.com/cpvrlab/SLProject/wiki/Coding-Style-Guidelines
@@ -8,7 +8,7 @@
 //             Please visit: http://opensource.org/licenses/GPL-3.0
 //#############################################################################
 
-#include "utils.h"
+#include "Utils.h"
 #include <sstream>
 #include <iostream>
 #include <iomanip>
@@ -52,7 +52,7 @@ string Utils::toString(double d, int roundedDecimals)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in lower case
-string toLower(string s)
+string Utils::toLower(string s)
 {
     string cpy(s);
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::tolower);
@@ -60,7 +60,7 @@ string toLower(string s)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in upper case
-string toUpper(string s)
+string Utils::toUpper(string s)
 {
     string cpy(s);
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
@@ -68,7 +68,7 @@ string toUpper(string s)
 }
 //-----------------------------------------------------------------------------
 //! Returns the path w. '\\' of path-filename string
-string getPath(const string& pathFilename)
+string Utils::getPath(const string& pathFilename)
 {
     size_t i1, i2;
     i1 = pathFilename.rfind('\\', pathFilename.length());
@@ -88,7 +88,7 @@ string getPath(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the filename of path-filename string
-string getFileName(const string& pathFilename)
+string Utils::getFileName(const string& pathFilename)
 {
     size_t i = 0, i1, i2;
     i1       = pathFilename.rfind('\\', pathFilename.length());
@@ -105,7 +105,7 @@ string getFileName(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the filename without extension
-string getFileNameWOExt(const string& pathFilename)
+string Utils::getFileNameWOExt(const string& pathFilename)
 {
     string filename = getFileName(pathFilename);
     size_t i;
@@ -119,7 +119,7 @@ string getFileNameWOExt(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the file extension without dot in lower case
-string getFileExt(string filename)
+string Utils::getFileExt(string filename)
 {
     size_t i;
     i = filename.rfind('.', filename.length());
@@ -129,7 +129,7 @@ string getFileExt(string filename)
 }
 //-----------------------------------------------------------------------------
 //! Returns a vector of storted filesnames in dir
-vector<string> getFileNamesInDir(const string dirName)
+vector<string> Utils::getFileNamesInDir(const string dirName)
 {
     vector<string> fileNames;
     DIR*           dir;
@@ -153,14 +153,14 @@ vector<string> getFileNamesInDir(const string dirName)
 }
 //-----------------------------------------------------------------------------
 //! Utils::trims a string at the end
-string trim(string& s, const string& drop = " ")
+string Utils::trim(string& s, const string& drop)
 {
     string r = s.erase(s.find_last_not_of(drop) + 1);
     return r.erase(0, r.find_first_not_of(drop));
 }
 //-----------------------------------------------------------------------------
 //! Splits an input string at a delimeter character into a string vector
-void split(const string&   s,
+void Utils::split(const string&   s,
            char            delimiter,
            vector<string>& splits)
 {
@@ -178,7 +178,7 @@ void split(const string&   s,
 }
 //-----------------------------------------------------------------------------
 //! Replaces in the source string the from string by the to string
-void replaceString(string&       source,
+void Utils::replaceString(string&       source,
                    const string& from,
                    const string& to)
 {
@@ -203,7 +203,7 @@ void replaceString(string&       source,
 }
 //-----------------------------------------------------------------------------
 //! Returns local time as string
-string getLocalTimeString()
+string Utils::getLocalTimeString()
 {
     time_t tm;
     time(&tm);
@@ -214,7 +214,7 @@ string getLocalTimeString()
 }
 //-----------------------------------------------------------------------------
 //! Returns a formatted string as sprintf
-string formatString(const string fmt_str, ...)
+string Utils::formatString(const string fmt_str, ...)
 {
     // Reserve two times as much as the length of the fmt_str
     int                final_n, n = ((int)fmt_str.size()) * 2;
@@ -237,13 +237,13 @@ string formatString(const string fmt_str, ...)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if container contains the search string
-bool contains(const string container, const string search)
+bool Utils::contains(const string container, const string search)
 {
     return (container.find(search) != string::npos);
 }
 //-----------------------------------------------------------------------------
 //! Returns inputDir with unified forward slashes
-string unifySlashes(const string& inputDir)
+string Utils::unifySlashes(const string& inputDir)
 {
     string copy = inputDir;
     string curr;
@@ -266,7 +266,7 @@ string unifySlashes(const string& inputDir)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if a directory exists.
-bool dirExists(string& path)
+bool Utils::dirExists(string& path)
 {
     struct stat info;
     if (stat(path.c_str(), &info) != 0)
@@ -278,7 +278,7 @@ bool dirExists(string& path)
 }
 //-----------------------------------------------------------------------------
 //! Creates a directory with given path
-void makeDir(const string& path)
+void Utils::makeDir(const string& path)
 {
 #if defined(_WIN32)
     _mkdir(path.c_str());
@@ -288,7 +288,7 @@ void makeDir(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Removes a directory with given path
-void removeDir(const string& path)
+void Utils::removeDir(const string& path)
 {
 #if defined(_WIN32)
     int ret = _rmdir(path.c_str());
@@ -304,14 +304,14 @@ void removeDir(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if a file exists.
-bool fileExists(const string& pathfilename)
+bool Utils::fileExists(const string& pathfilename)
 {
     struct stat info;
     return (stat(pathfilename.c_str(), &info) == 0);
 }
 //-----------------------------------------------------------------------------
 //! Returns the writable configuration directory
-string getAppsWritableDir()
+string Utils::getAppsWritableDir()
 {
 #if defined(_WIN32)
     string appData   = getenv("APPDATA");
@@ -342,15 +342,15 @@ string getAppsWritableDir()
 }
 //-----------------------------------------------------------------------------
 //! Returns the working directory
-string getCurrentWorkingDir()
+string Utils::getCurrentWorkingDir()
 {
 #if defined(_WIN32)
-    SLint size   = 256;
+    int size   = 256;
     char* buffer = (char*)malloc(size);
     if (_getcwd(buffer, size) == buffer)
     {
-        SLstring dir = buffer;
-        SLUtils::replaceString(dir, "\\", "/");
+        string dir = buffer;
+        replaceString(dir, "\\", "/");
         return dir + "/";
     }
 
@@ -368,7 +368,7 @@ string getCurrentWorkingDir()
 }
 //-----------------------------------------------------------------------------
 //! Deletes a file on the filesystem
-bool deleteFile(string& pathfilename)
+bool Utils::deleteFile(string& pathfilename)
 {
     if (Utils::fileExists(pathfilename))
         return remove(pathfilename.c_str()) != 0;
