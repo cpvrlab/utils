@@ -9,11 +9,16 @@
 //#############################################################################
 
 #include "Utils.h"
+
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cstdarg>
+#include <cstring>
 #include <vector>
+#include <algorithm>
+#include <thread>
 #include <dirent.h>
 
 #if defined(_WIN32)
@@ -24,6 +29,7 @@
 #elif defined(ANDROID) || defined(ANDROID_NDK)
 #    include <unistd.h> //getcwd
 #    include <sys/stat.h>
+#    include <android/log.h>
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 #    include <unistd.h> //getcwd
 #endif
@@ -161,8 +167,8 @@ string Utils::trim(string& s, const string& drop)
 //-----------------------------------------------------------------------------
 //! Splits an input string at a delimeter character into a string vector
 void Utils::split(const string&   s,
-           char            delimiter,
-           vector<string>& splits)
+                  char            delimiter,
+                  vector<string>& splits)
 {
     string::size_type i = 0;
     string::size_type j = s.find(delimiter);
@@ -179,8 +185,8 @@ void Utils::split(const string&   s,
 //-----------------------------------------------------------------------------
 //! Replaces in the source string the from string by the to string
 void Utils::replaceString(string&       source,
-                   const string& from,
-                   const string& to)
+                          const string& from,
+                          const string& to)
 {
     // Code from: http://stackoverflow.com/questions/2896600/
     // how-to-replace-all-occurrences-of-a-character-in-string
@@ -296,7 +302,7 @@ void Utils::removeDir(const string& path)
     {
         errno_t err;
         _get_errno(&err);
-        SL_LOG("Could not remove directory: %s\nErrno: %s\n", path.c_str(), strerror(errno));
+        log("Could not remove directory: %s\nErrno: %s\n", path.c_str(), strerror(errno));
     }
 #else
     rmdir(path.c_str());
@@ -345,7 +351,7 @@ string Utils::getAppsWritableDir()
 string Utils::getCurrentWorkingDir()
 {
 #if defined(_WIN32)
-    int size   = 256;
+    int   size   = 256;
     char* buffer = (char*)malloc(size);
     if (_getcwd(buffer, size) == buffer)
     {
@@ -373,5 +379,71 @@ bool Utils::deleteFile(string& pathfilename)
     if (Utils::fileExists(pathfilename))
         return remove(pathfilename.c_str()) != 0;
     return false;
+}
+//-----------------------------------------------------------------------------
+//! logs a formatted string platform independently
+void Utils::log(const char* appString,
+                const char* format,
+                ...)
+{
+    char    log[4096];
+    va_list argptr;
+    va_start(argptr, format);
+    vsprintf(log, format, argptr);
+    va_end(argptr);
+
+#if defined(SL_OS_ANDROID)
+    __android_log_print(ANDROID_LOG_INFO, appString, log);
+#else
+    cout << log << std::flush;
+#endif
+}
+//-----------------------------------------------------------------------------
+//! Terminates the application with a message. No leak checking.
+void Utils::exitMsg(const char* msg,
+                    const char* appString,
+                    const int   line,
+                    const char* file)
+{
+#if defined(ANDROID) || defined(ANDROID_NDK)
+    __android_log_print(ANDROID_LOG_INFO,
+                        appString,
+                        "Exit %s at line %d in %s\n",
+                        msg,
+                        line,
+                        file);
+#else
+    log("Exit %s at line %d in %s\n", msg, line, file);
+#endif
+
+    exit(-1);
+}
+//-----------------------------------------------------------------------------
+//! Warn message output
+void Utils::warnMsg(const char* msg,
+                    const char* appString,
+                    const int   line,
+                    const char* file)
+{
+#if defined(ANDROID) || defined(ANDROID_NDK)
+    __android_log_print(ANDROID_LOG_INFO,
+                        appString,
+                        "Warning: %s at line %d in %s\n",
+                        msg,
+                        line,
+                        file);
+#else
+    log("Warning %s at line %d in %s\n", msg, line, file);
+#endif
+}
+//-----------------------------------------------------------------------------
+//! Returns in release config the max. NO. of threads otherwise 1
+unsigned int Utils::maxThreads()
+{
+#ifdef _DEBUG
+    return 1;
+#else
+    return max(thread::hardware_concurrency(), 1U);
+#endif
 }
 //-----------------------------------------------------------------------------

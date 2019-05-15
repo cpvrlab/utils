@@ -9,15 +9,6 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}")
 set(platform_specific_link_libraries)
 set(platform_specific_include_directories)
 
-file(GLOB headers
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
-    )
-
-file(GLOB sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
-)
-
-
 set(compile_definitions
     ${compile_definitions}
 	ASIO_STANDALONE
@@ -26,15 +17,18 @@ set(compile_definitions
 	ASIO_HAS_STD_ADDRESSOF
 )
 
-#==============================================================================
-if("${SYSTEM_NAME_UPPER}" STREQUAL "LINUX")
+set(headers ${headers} ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h)
+set(sources ${sources} ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp)
 
-elseif("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS") #----------------------------
+#==============================================================================
+if("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS")
     set(platform_specific_include_dirs
         ${UTILS_ROOT}/thirdparty/dirent)
-
-elseif("${SYSTEM_NAME_UPPER}" STREQUAL "DARWIN") #-----------------------------
-
+    set(headers ${headers} ${UTILS_ROOT}/thirdparty/dirent/dirent.h)
+    set(sources ${sources} ${UTILS_ROOT}/thirdparty/dirent/dirent.c)
+elseif("${SYSTEM_NAME_UPPER}" STREQUAL "ANDROID") #----------------------------
+    set(platform_specific_include_dirs
+        ${UTILS_ROOT}/thirdparty/dirent)
 endif()
 #==============================================================================
 
@@ -48,6 +42,7 @@ add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})
 set_target_properties(${target}
     PROPERTIES
     ${DEFAULT_PROJECT_OPTIONS}
+    FOLDER "external"
     )
 
 target_include_directories(${target}
@@ -86,6 +81,7 @@ target_link_libraries(${target}
     PRIVATE
 
     PUBLIC
+    ${PlatformLinkLibs}
     ${DEFAULT_LINKER_OPTIONS}
 
     INTERFACE

@@ -89,6 +89,25 @@ class Utils
 
     //! Deletes a file on the filesystem
     static bool deleteFile(string& pathfilename);
+
+    //! logs a formatted string platform independently
+    static void log(const char* appString,
+                    const char* format,
+                    ...);
+
+    //! Terminates the application with a message. No leak cheching.
+    static void exitMsg(const char* msg,
+                        const char* appString,
+                        const int   line,
+                        const char* file);
+
+    static void warnMsg(const char* msg,
+                        const char* appString,
+                        const int   line,
+                        const char* file);
+
+    //! Returns in release config the max. NO. of threads otherwise 1
+    static unsigned int maxThreads();
 };
 //-----------------------------------------------------------------------------
 #endif
