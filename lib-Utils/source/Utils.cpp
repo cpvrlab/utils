@@ -322,11 +322,11 @@ void Utils::makeDir(const string& path)
 #if defined(USE_STD_FILESYSTEM)
     fs::create_directories(path);
 #else
-#   if defined(_WIN32)
-        _mkdir(path.c_str());
-#   else
-        mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-#   endif
+#    if defined(_WIN32)
+    _mkdir(path.c_str());
+#    else
+    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#    endif
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -450,8 +450,8 @@ void Utils::log(const char* appString,
 }
 //-----------------------------------------------------------------------------
 //! Terminates the application with a message. No leak checking.
-void Utils::exitMsg(const char* msg,
-                    const char* appString,
+void Utils::exitMsg(const char* appString,
+                    const char* msg,
                     const int   line,
                     const char* file)
 {
@@ -470,8 +470,8 @@ void Utils::exitMsg(const char* msg,
 }
 //-----------------------------------------------------------------------------
 //! Warn message output
-void Utils::warnMsg(const char* msg,
-                    const char* appString,
+void Utils::warnMsg(const char* appString,
+                    const char* msg,
                     const int   line,
                     const char* file)
 {
@@ -526,7 +526,7 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
     }
 
     asio::streambuf request;
-    std::ostream    request_stream(&request);
+    ostream         request_stream(&request);
 
     request_stream << "GET " << getCommand << " HTTP/1.0\r\n";
     request_stream << "Host: " << serverName << "\r\n";
@@ -541,19 +541,25 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
     asio::read_until(socket, response, "\r\n");
 
     // Check that response is OK.
-    std::istream response_stream(&response);
-    std::string  http_version;
+    istream response_stream(&response);
+    string  http_version;
     response_stream >> http_version;
     uint status_code;
     response_stream >> status_code;
-    std::string status_message;
-    std::getline(response_stream, status_message);
+    string status_message;
+    getline(response_stream, status_message);
+
+    if (status_code != 200)
+    {
+        log("Utils", "HTTP Response returned status code: %u", status_code);
+        return;
+    }
 
     // Read the response headers, which are terminated by a blank line.
     asio::read_until(socket, response, "\r\n\r\n");
 
     // Process the response headers.
-    std::string header;
+    string header;
     while (std::getline(response_stream, header) && header != "\r")
     {
     }
@@ -565,6 +571,7 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
     {
         outFile << &response;
     }
+
     // Read until EOF, writing data to output as we go.
     while (asio::read(socket, response, asio::transfer_at_least(1), error))
     {

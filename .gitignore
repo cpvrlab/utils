@@ -1,6 +1,5 @@
 _build*
 build*
 _bin*
-bin*
 CMakeLists.txt.user*
 .vscode
