@@ -11,7 +11,9 @@
 #include "Utils.h"
 
 #include <sstream>
+#include <cstddef>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <string>
 #include <cstdarg>
@@ -19,12 +21,14 @@
 #include <vector>
 #include <algorithm>
 #include <thread>
+#include <asio.hpp>
+#include <asio/ip/tcp.hpp>
 
 #if defined(_WIN32)
 #    if _MSC_VER >= 1912
 #        include <filesystem>
 #        define USE_STD_FILESYSTEM
-         namespace fs = std::experimental::filesystem;
+namespace fs = std::experimental::filesystem;
 #    else
 #        include <direct.h> //_getcwd
 #    endif
@@ -45,6 +49,7 @@
 #endif
 
 using namespace std;
+using asio::ip::tcp;
 
 //-----------------------------------------------------------------------------
 //! Returns a string from a float with max. one trailing zero
@@ -173,7 +178,7 @@ vector<string> Utils::getFileNamesInDir(const string dirName)
             i++;
             string name(dirContent->d_name);
             if (name != "." && name != "..")
-                filePathNames.push_back(dirName + "/" + name);
+                filePathNames.push_back(dirName + name);
         }
         closedir(dir);
     }
@@ -317,11 +322,11 @@ void Utils::makeDir(const string& path)
 #if defined(USE_STD_FILESYSTEM)
     fs::create_directories(path);
 #else
-#    if defined(_WIN32)
-         _mkdir(path.c_str());
-#    else
-         mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-#    endif
+#   if defined(_WIN32)
+        _mkdir(path.c_str());
+#   else
+        mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#   endif
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -332,7 +337,7 @@ void Utils::removeDir(const string& path)
 #if defined(USE_STD_FILESYSTEM)
     fs::remove_all(path);
 #else
-#   if defined(_WIN32)
+#    if defined(_WIN32)
     int ret = _rmdir(path.c_str());
     if (ret != 0)
     {
@@ -340,9 +345,9 @@ void Utils::removeDir(const string& path)
         _get_errno(&err);
         log("Could not remove directory: %s\nErrno: %s\n", path.c_str(), strerror(errno));
     }
-#   else
-        rmdir(path.c_str());
-#   endif
+#    else
+    rmdir(path.c_str());
+#    endif
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -490,5 +495,80 @@ unsigned int Utils::maxThreads()
 #else
     return max(thread::hardware_concurrency(), 1U);
 #endif
+}
+//-----------------------------------------------------------------------------
+void Utils::httpGet(const string& httpURL, const string& outFolder)
+{
+    // Remove "http://"
+    string url = httpURL;
+    Utils::replaceString(url, "http://", "");
+
+    // Get server name and get command
+    string serverName  = url.substr(0, url.find('/'));
+    string getCommand  = url.substr(url.find('/'), url.length());
+    string outFilename = url.substr(url.find_last_of('/') + 1, url.length());
+
+    asio::io_service io_service;
+
+    // Get a list of endpoints corresponding to the server name.
+    tcp::resolver           resolver(io_service);
+    tcp::resolver::query    query(serverName, "http");
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+    tcp::resolver::iterator end;
+
+    // Try each endpoint until we successfully establish a connection.
+    tcp::socket      socket(io_service);
+    asio::error_code error = asio::error::host_not_found;
+    while (error && endpoint_iterator != end)
+    {
+        socket.close();
+        socket.connect(*endpoint_iterator++, error);
+    }
+
+    asio::streambuf request;
+    std::ostream    request_stream(&request);
+
+    request_stream << "GET " << getCommand << " HTTP/1.0\r\n";
+    request_stream << "Host: " << serverName << "\r\n";
+    request_stream << "Accept: */*\r\n";
+    request_stream << "Connection: close\r\n\r\n";
+
+    // Send the request.
+    asio::write(socket, request);
+
+    // Read the response status line.
+    asio::streambuf response;
+    asio::read_until(socket, response, "\r\n");
+
+    // Check that response is OK.
+    std::istream response_stream(&response);
+    std::string  http_version;
+    response_stream >> http_version;
+    uint status_code;
+    response_stream >> status_code;
+    std::string status_message;
+    std::getline(response_stream, status_message);
+
+    // Read the response headers, which are terminated by a blank line.
+    asio::read_until(socket, response, "\r\n\r\n");
+
+    // Process the response headers.
+    std::string header;
+    while (std::getline(response_stream, header) && header != "\r")
+    {
+    }
+
+    ofstream outFile(outFilename, ofstream::out | ofstream::binary);
+
+    // Write whatever content we already have to output.
+    if (response.size() > 0)
+    {
+        outFile << &response;
+    }
+    // Read until EOF, writing data to output as we go.
+    while (asio::read(socket, response, asio::transfer_at_least(1), error))
+    {
+        outFile << &response;
+    }
 }
 //-----------------------------------------------------------------------------

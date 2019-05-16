@@ -96,10 +96,10 @@ class Utils
                     ...);
 
     //! Terminates the application with a message. No leak cheching.
-    static void exitMsg(const char* msg,
-                        const char* appString,
-                        const int   line,
-                        const char* file);
+    [[noreturn]] static void exitMsg(const char* msg,
+                                     const char* appString,
+                                     const int   line,
+                                     const char* file);
 
     static void warnMsg(const char* msg,
                         const char* appString,
@@ -108,6 +108,9 @@ class Utils
 
     //! Returns in release config the max. NO. of threads otherwise 1
     static unsigned int maxThreads();
+
+    //! Download file into the outFile
+    static void httpGet(const string& httpURL, const string& outFolder = "");
 };
 //-----------------------------------------------------------------------------
 #endif

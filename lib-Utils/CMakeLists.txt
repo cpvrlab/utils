@@ -50,7 +50,7 @@ target_include_directories(${target}
 
     PUBLIC
     ${platform_specific_include_dirs}
-    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asio/include
+    ${UTILS_ROOT}/thirdparty/asio/include
     ${DEFAULT_INCLUDE_DIRECTORIES}
 
     INTERFACE
