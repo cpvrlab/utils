@@ -19,18 +19,26 @@
 #include <vector>
 #include <algorithm>
 #include <thread>
-#include <dirent.h>
 
 #if defined(_WIN32)
-#    include <direct.h> //_getcwd
+#    if _MSC_VER >= 1912
+#        include <filesystem>
+#        define USE_STD_FILESYSTEM
+         namespace fs = std::experimental::filesystem;
+#    else
+#        include <direct.h> //_getcwd
+#    endif
 #elif defined(__APPLE__)
+#    include <dirent.h>
 #    include <unistd.h>   //getcwd
 #    include <sys/stat.h> //dirent
 #elif defined(ANDROID) || defined(ANDROID_NDK)
+#    include <android/log.h>
+#    include <dirent.h>
 #    include <unistd.h> //getcwd
 #    include <sys/stat.h>
-#    include <android/log.h>
 #elif defined(linux) || defined(__linux) || defined(__linux__)
+#    include <dirent.h>
 #    include <unistd.h> //getcwd
 #endif
 
@@ -134,11 +142,23 @@ string Utils::getFileExt(string filename)
     return ("");
 }
 //-----------------------------------------------------------------------------
-//! Returns a vector of storted filesnames in dir
+//! Returns a vector of storted filesnames with path in dir
 vector<string> Utils::getFileNamesInDir(const string dirName)
 {
-    vector<string> fileNames;
-    DIR*           dir;
+    vector<string> filePathNames;
+
+#if defined(USE_STD_FILESYSTEM)
+    if (fs::exists(dirName) && fs::is_directory(dirName))
+    {
+        for (const auto& entry : fs::directory_iterator(dirName))
+        {
+            auto filename = entry.path().filename();
+            if (fs::is_regular_file(entry.status()))
+                filePathNames.push_back(dirName + "/" + filename.u8string());
+        }
+    }
+#else
+    DIR* dir;
     dir = opendir(dirName.c_str());
 
     if (dir)
@@ -151,11 +171,13 @@ vector<string> Utils::getFileNamesInDir(const string dirName)
             i++;
             string name(dirContent->d_name);
             if (name != "." && name != "..")
-                fileNames.push_back(dirName + "/" + name);
+                filePathNames.push_back(dirName + "/" + name);
         }
         closedir(dir);
     }
-    return fileNames;
+#endif
+
+    return filePathNames;
 }
 //-----------------------------------------------------------------------------
 //! Utils::trims a string at the end
@@ -274,6 +296,9 @@ string Utils::unifySlashes(const string& inputDir)
 //! Returns true if a directory exists.
 bool Utils::dirExists(string& path)
 {
+#if defined(USE_STD_FILESYSTEM)
+    return fs::exists(path) && fs::is_directory(path);
+#else
     struct stat info;
     if (stat(path.c_str(), &info) != 0)
         return false;
@@ -281,22 +306,31 @@ bool Utils::dirExists(string& path)
         return true;
     else
         return false;
+#endif
 }
 //-----------------------------------------------------------------------------
 //! Creates a directory with given path
 void Utils::makeDir(const string& path)
 {
-#if defined(_WIN32)
-    _mkdir(path.c_str());
+#if defined(USE_STD_FILESYSTEM)
+    fs::create_directories(path);
 #else
-    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#    if defined(_WIN32)
+         _mkdir(path.c_str());
+#    else
+         mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#    endif
 #endif
 }
 //-----------------------------------------------------------------------------
 //! Removes a directory with given path
 void Utils::removeDir(const string& path)
 {
-#if defined(_WIN32)
+
+#if defined(USE_STD_FILESYSTEM)
+    fs::remove_all(path);
+#else
+#   if defined(_WIN32)
     int ret = _rmdir(path.c_str());
     if (ret != 0)
     {
@@ -304,16 +338,21 @@ void Utils::removeDir(const string& path)
         _get_errno(&err);
         log("Could not remove directory: %s\nErrno: %s\n", path.c_str(), strerror(errno));
     }
-#else
-    rmdir(path.c_str());
+#   else
+        rmdir(path.c_str());
+#   endif
 #endif
 }
 //-----------------------------------------------------------------------------
 //! Returns true if a file exists.
 bool Utils::fileExists(const string& pathfilename)
 {
+#if defined(USE_STD_FILESYSTEM)
+    return fs::exists(pathfilename);
+#else
     struct stat info;
     return (stat(pathfilename.c_str(), &info) == 0);
+#endif
 }
 //-----------------------------------------------------------------------------
 //! Returns the writable configuration directory
@@ -324,7 +363,7 @@ string Utils::getAppsWritableDir()
     string configDir = appData + "/SLProject";
     Utils::replaceString(configDir, "\\", "/");
     if (!dirExists(configDir))
-        _mkdir(configDir.c_str());
+        makeDir(configDir.c_str());
     return configDir + "/";
 #elif defined(__APPLE__)
     string home      = getenv("HOME");
@@ -351,6 +390,9 @@ string Utils::getAppsWritableDir()
 string Utils::getCurrentWorkingDir()
 {
 #if defined(_WIN32)
+#    if defined(USE_STD_FILESYSTEM)
+    return fs::current_path().u8string();
+#    else
     int   size   = 256;
     char* buffer = (char*)malloc(size);
     if (_getcwd(buffer, size) == buffer)
@@ -362,6 +404,7 @@ string Utils::getCurrentWorkingDir()
 
     free(buffer);
     return "";
+#    endif
 #else
     size_t size   = 256;
     char*  buffer = (char*)malloc(size);
