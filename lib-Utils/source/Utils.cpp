@@ -40,6 +40,8 @@
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 #    include <dirent.h>
 #    include <unistd.h> //getcwd
+#    include <sys/types.h>
+#    include <sys/stat.h>
 #endif
 
 using namespace std;
