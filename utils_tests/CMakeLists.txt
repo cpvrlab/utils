@@ -2,18 +2,19 @@
 # CMake project definition for utils_tests project
 #
 
-set(target tests)
+set(target utils_tests)
 
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(${target}
-    tests.cpp
+    utils_tests.cpp
     )
 
 set_target_properties(${target}
     PROPERTIES
     ${DEFAULT_PROJECT_OPTIONS}
+    FOLDER "external"
     )
 
 target_include_directories(${target}

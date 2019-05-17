@@ -51,6 +51,10 @@ namespace fs = std::experimental::filesystem;
 using namespace std;
 using asio::ip::tcp;
 
+///////////////////////////////
+// String Handling Functions //
+///////////////////////////////
+
 //-----------------------------------------------------------------------------
 //! Returns a string from a float with max. one trailing zero
 string Utils::toString(float f, int roundedDecimals)
@@ -73,7 +77,7 @@ string Utils::toString(double d, int roundedDecimals)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in lower case
-string Utils::toLower(string s)
+string Utils::toLowerString(string s)
 {
     string cpy(s);
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::tolower);
@@ -81,123 +85,26 @@ string Utils::toLower(string s)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in upper case
-string Utils::toUpper(string s)
+string Utils::toUpperString(string s)
 {
     string cpy(s);
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
     return cpy;
 }
-//-----------------------------------------------------------------------------
-//! Returns the path w. '\\' of path-filename string
-string Utils::getPath(const string& pathFilename)
-{
-    size_t i1, i2;
-    i1 = pathFilename.rfind('\\', pathFilename.length());
-    i2 = pathFilename.rfind('/', pathFilename.length());
-    if ((i1 != string::npos && i2 == string::npos) ||
-        (i1 != string::npos && i1 > i2))
-    {
-        return (pathFilename.substr(0, i1 + 1));
-    }
 
-    if ((i2 != string::npos && i1 == string::npos) ||
-        (i2 != string::npos && i2 > i1))
-    {
-        return (pathFilename.substr(0, i2 + 1));
-    }
-    return pathFilename;
-}
-//-----------------------------------------------------------------------------
-//! Returns the filename of path-filename string
-string Utils::getFileName(const string& pathFilename)
-{
-    size_t i = 0, i1, i2;
-    i1       = pathFilename.rfind('\\', pathFilename.length());
-    i2       = pathFilename.rfind('/', pathFilename.length());
-
-    if (i1 != string::npos && i2 != string::npos)
-        i = max(i1, i2);
-    else if (i1 != string::npos)
-        i = i1;
-    else if (i2 != string::npos)
-        i = i2;
-
-    return pathFilename.substr(i + 1, pathFilename.length() - i);
-}
-//-----------------------------------------------------------------------------
-//! Returns the filename without extension
-string Utils::getFileNameWOExt(const string& pathFilename)
-{
-    string filename = getFileName(pathFilename);
-    size_t i;
-    i = filename.rfind('.', filename.length());
-    if (i != string::npos)
-    {
-        return (filename.substr(0, i));
-    }
-
-    return (filename);
-}
-//-----------------------------------------------------------------------------
-//! Returns the file extension without dot in lower case
-string Utils::getFileExt(string filename)
-{
-    size_t i;
-    i = filename.rfind('.', filename.length());
-    if (i != string::npos)
-        return toLower(filename.substr(i + 1, filename.length() - i));
-    return ("");
-}
-//-----------------------------------------------------------------------------
-//! Returns a vector of storted filesnames with path in dir
-vector<string> Utils::getFileNamesInDir(const string dirName)
-{
-    vector<string> filePathNames;
-
-#if defined(USE_STD_FILESYSTEM)
-    if (fs::exists(dirName) && fs::is_directory(dirName))
-    {
-        for (const auto& entry : fs::directory_iterator(dirName))
-        {
-            auto filename = entry.path().filename();
-            if (fs::is_regular_file(entry.status()))
-                filePathNames.push_back(dirName + "/" + filename.u8string());
-        }
-    }
-#else
-    DIR* dir;
-    dir = opendir(dirName.c_str());
-
-    if (dir)
-    {
-        struct dirent* dirContent;
-        int            i = 0;
-
-        while ((dirContent = readdir(dir)) != nullptr)
-        {
-            i++;
-            string name(dirContent->d_name);
-            if (name != "." && name != "..")
-                filePathNames.push_back(dirName + name);
-        }
-        closedir(dir);
-    }
-#endif
-
-    return filePathNames;
-}
 //-----------------------------------------------------------------------------
 //! Utils::trims a string at the end
-string Utils::trim(string& s, const string& drop)
+string Utils::trimString(const string& s, const string& drop)
 {
-    string r = s.erase(s.find_last_not_of(drop) + 1);
+    string r = s;
+    r        = r.erase(r.find_last_not_of(drop) + 1);
     return r.erase(0, r.find_first_not_of(drop));
 }
 //-----------------------------------------------------------------------------
 //! Splits an input string at a delimeter character into a string vector
-void Utils::split(const string&   s,
-                  char            delimiter,
-                  vector<string>& splits)
+void Utils::splitString(const string&   s,
+                        char            delimiter,
+                        vector<string>& splits)
 {
     string::size_type i = 0;
     string::size_type j = s.find(delimiter);
@@ -272,7 +179,7 @@ string Utils::formatString(const string fmt_str, ...)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if container contains the search string
-bool Utils::contains(const string container, const string search)
+bool Utils::containsString(const string container, const string search)
 {
     return (container.find(search) != string::npos);
 }
@@ -300,8 +207,112 @@ string Utils::unifySlashes(const string& inputDir)
     return curr;
 }
 //-----------------------------------------------------------------------------
+//! Returns the path w. '\\' of path-filename string
+string Utils::getPath(const string& pathFilename)
+{
+    size_t i1, i2;
+    i1 = pathFilename.rfind('\\', pathFilename.length());
+    i2 = pathFilename.rfind('/', pathFilename.length());
+    if ((i1 != string::npos && i2 == string::npos) ||
+        (i1 != string::npos && i1 > i2))
+    {
+        return (pathFilename.substr(0, i1 + 1));
+    }
+
+    if ((i2 != string::npos && i1 == string::npos) ||
+        (i2 != string::npos && i2 > i1))
+    {
+        return (pathFilename.substr(0, i2 + 1));
+    }
+    return pathFilename;
+}
+
+/////////////////////////////
+// File Handling Functions //
+/////////////////////////////
+
+//-----------------------------------------------------------------------------
+//! Returns the filename of path-filename string
+string Utils::getFileName(const string& pathFilename)
+{
+    size_t i = 0, i1, i2;
+    i1       = pathFilename.rfind('\\', pathFilename.length());
+    i2       = pathFilename.rfind('/', pathFilename.length());
+
+    if (i1 != string::npos && i2 != string::npos)
+        i = max(i1, i2);
+    else if (i1 != string::npos)
+        i = i1;
+    else if (i2 != string::npos)
+        i = i2;
+
+    return pathFilename.substr(i + 1, pathFilename.length() - i);
+}
+//-----------------------------------------------------------------------------
+//! Returns the filename without extension
+string Utils::getFileNameWOExt(const string& pathFilename)
+{
+    string filename = getFileName(pathFilename);
+    size_t i;
+    i = filename.rfind('.', filename.length());
+    if (i != string::npos)
+    {
+        return (filename.substr(0, i));
+    }
+
+    return (filename);
+}
+//-----------------------------------------------------------------------------
+//! Returns the file extension without dot in lower case
+string Utils::getFileExt(const string filename)
+{
+    size_t i;
+    i = filename.rfind('.', filename.length());
+    if (i != string::npos)
+        return toLowerString(filename.substr(i + 1, filename.length() - i));
+    return ("");
+}
+//-----------------------------------------------------------------------------
+//! Returns a vector of storted filesnames with path in dir
+vector<string> Utils::getFileNamesInDir(const string dirName)
+{
+    vector<string> filePathNames;
+
+#if defined(USE_STD_FILESYSTEM)
+    if (fs::exists(dirName) && fs::is_directory(dirName))
+    {
+        for (const auto& entry : fs::directory_iterator(dirName))
+        {
+            auto filename = entry.path().filename();
+            if (fs::is_regular_file(entry.status()))
+                filePathNames.push_back(dirName + "/" + filename.u8string());
+        }
+    }
+#else
+    DIR* dir;
+    dir = opendir(dirName.c_str());
+
+    if (dir)
+    {
+        struct dirent* dirContent;
+        int            i = 0;
+
+        while ((dirContent = readdir(dir)) != nullptr)
+        {
+            i++;
+            string name(dirContent->d_name);
+            if (name != "." && name != "..")
+                filePathNames.push_back(dirName + name);
+        }
+        closedir(dir);
+    }
+#endif
+
+    return filePathNames;
+}
+//-----------------------------------------------------------------------------
 //! Returns true if a directory exists.
-bool Utils::dirExists(string& path)
+bool Utils::dirExists(const string& path)
 {
 #if defined(USE_STD_FILESYSTEM)
     return fs::exists(path) && fs::is_directory(path);
@@ -362,7 +373,7 @@ bool Utils::fileExists(const string& pathfilename)
 #endif
 }
 //-----------------------------------------------------------------------------
-//! Returns the writable configuration directory
+//! Returns the writable configuration directory with trailing forward slash
 string Utils::getAppsWritableDir()
 {
 #if defined(_WIN32)
@@ -393,7 +404,7 @@ string Utils::getAppsWritableDir()
 #endif
 }
 //-----------------------------------------------------------------------------
-//! Returns the working directory
+//! Returns the working directory with forward slashes inbetween and at the end
 string Utils::getCurrentWorkingDir()
 {
 #if defined(_WIN32)
@@ -430,10 +441,16 @@ bool Utils::deleteFile(string& pathfilename)
         return remove(pathfilename.c_str()) != 0;
     return false;
 }
+
+///////////////////////
+// Logging Functions //
+///////////////////////
+
+//-----------------------------------------------------------------------------
+string Utils::logAppName = "";
 //-----------------------------------------------------------------------------
 //! logs a formatted string platform independently
-void Utils::log(const char* appString,
-                const char* format,
+void Utils::log(const char* format,
                 ...)
 {
     char    log[4096];
@@ -443,47 +460,53 @@ void Utils::log(const char* appString,
     va_end(argptr);
 
 #if defined(SL_OS_ANDROID)
-    __android_log_print(ANDROID_LOG_INFO, appString, log);
+    __android_log_print(ANDROID_LOG_INFO, logAppName.c_str(), log);
 #else
     cout << log << std::flush;
 #endif
 }
 //-----------------------------------------------------------------------------
 //! Terminates the application with a message. No leak checking.
-void Utils::exitMsg(const char* appString,
-                    const char* msg,
+void Utils::exitMsg(const char* msg,
                     const int   line,
                     const char* file)
 {
 #if defined(ANDROID) || defined(ANDROID_NDK)
     __android_log_print(ANDROID_LOG_INFO,
-                        appString,
+                        logAppName.c_str(),
                         "Exit %s at line %d in %s\n",
                         msg,
                         line,
                         file);
 #else
-    log("Exit %s at line %d in %s\n", msg, line, file);
+    log("%s: Exit %s at line %d in %s\n",
+        logAppName.c_str(),
+        msg,
+        line,
+        file);
 #endif
 
     exit(-1);
 }
 //-----------------------------------------------------------------------------
 //! Warn message output
-void Utils::warnMsg(const char* appString,
-                    const char* msg,
+void Utils::warnMsg(const char* msg,
                     const int   line,
                     const char* file)
 {
 #if defined(ANDROID) || defined(ANDROID_NDK)
     __android_log_print(ANDROID_LOG_INFO,
-                        appString,
+                        logAppName.c_str(),
                         "Warning: %s at line %d in %s\n",
                         msg,
                         line,
                         file);
 #else
-    log("Warning %s at line %d in %s\n", msg, line, file);
+    log("%s: Warning %s at line %d in %s\n",
+        logAppName.c_str(),
+        msg,
+        line,
+        file);
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -496,86 +519,267 @@ unsigned int Utils::maxThreads()
     return max(thread::hardware_concurrency(), 1U);
 #endif
 }
+
+////////////////////////////////
+// Network Handling Functions //
+////////////////////////////////
 //-----------------------------------------------------------------------------
+/*! Downloads the file at httpURL with the same name in the outFolder. If the
+outFolder is empty it is stored in the current working directory.
+*/
 void Utils::httpGet(const string& httpURL, const string& outFolder)
 {
-    // Remove "http://"
-    string url = httpURL;
-    Utils::replaceString(url, "http://", "");
-
-    // Get server name and get command
-    string serverName  = url.substr(0, url.find('/'));
-    string getCommand  = url.substr(url.find('/'), url.length());
-    string outFilename = url.substr(url.find_last_of('/') + 1, url.length());
-
-    asio::io_service io_service;
-
-    // Get a list of endpoints corresponding to the server name.
-    tcp::resolver           resolver(io_service);
-    tcp::resolver::query    query(serverName, "http");
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    tcp::resolver::iterator end;
-
-    // Try each endpoint until we successfully establish a connection.
-    tcp::socket      socket(io_service);
-    asio::error_code error = asio::error::host_not_found;
-    while (error && endpoint_iterator != end)
+    try
     {
-        socket.close();
-        socket.connect(*endpoint_iterator++, error);
+        // Remove "http://"
+        string url = httpURL;
+        Utils::replaceString(url, "http://", "");
+
+        // Get server name and get command
+        string serverName  = url.substr(0, url.find('/'));
+        string getCommand  = url.substr(url.find('/'), url.length());
+        string outFilename = url.substr(url.find_last_of('/') + 1, url.length());
+
+        asio::io_service io_service;
+
+        // Get a list of endpoints corresponding to the server name.
+        tcp::resolver           resolver(io_service);
+        tcp::resolver::query    query(serverName, "http");
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        tcp::resolver::iterator end;
+
+        // Try each endpoint until we successfully establish a connection.
+        tcp::socket      socket(io_service);
+        asio::error_code error = asio::error::host_not_found;
+        while (error && endpoint_iterator != end)
+        {
+            socket.close();
+            socket.connect(*endpoint_iterator++, error);
+        }
+
+        asio::streambuf request;
+        ostream         request_stream(&request);
+
+        request_stream << "GET " << getCommand << " HTTP/1.0\r\n";
+        request_stream << "Host: " << serverName << "\r\n";
+        request_stream << "Accept: */*\r\n";
+        request_stream << "Connection: close\r\n\r\n";
+
+        // Send the request.
+        asio::write(socket, request);
+
+        // Read the response status line.
+        asio::streambuf response;
+        asio::read_until(socket, response, "\r\n");
+
+        // Check that response is OK.
+        istream response_stream(&response);
+        string  httpVersion;
+        response_stream >> httpVersion;
+        unsigned int statusCode;
+        response_stream >> statusCode;
+        string statusMsg;
+        getline(response_stream, statusMsg);
+        statusMsg = trimString(statusMsg);
+        replaceString(statusMsg, "\r", "");
+        replaceString(statusMsg, "\n", "");
+
+        // Check HTTP response status (400 means bad request)
+        if (statusCode != 200)
+        {
+            log("httpGet: HTTP Response returned status code: %d (%s)\n",
+                statusCode,
+                statusMsg.c_str());
+            return;
+        }
+
+        cout << endl
+             << "Http-Status: " << statusCode << endl;
+
+        // Read the response headers, which are terminated by a blank line.
+        asio::read_until(socket, response, "\r\n\r\n");
+
+        // Process the response headers.
+        string headerLine;
+        while (std::getline(response_stream, headerLine) && headerLine != "\r")
+        {
+            size_t splitPos = headerLine.find_first_of(':');
+            string info     = headerLine.substr(0, splitPos);
+            string value    = headerLine.substr(splitPos + 2);
+            cout << info << ":" << value << endl;
+        }
+
+        // Build full outFolderFilename
+        string outFolderFilename;
+        string cwd = getCurrentWorkingDir();
+        if (outFolder.empty())
+        {
+            outFolderFilename = cwd + outFilename;
+        }
+        else
+        {
+            if (dirExists(outFolder))
+                outFolderFilename = outFolder + outFilename;
+            else
+            {
+                string msg = "Outfolder not found: " + outFolder;
+                exitMsg(msg.c_str(), __LINE__, __FILE__);
+            }
+        }
+
+        ofstream outFile(outFolderFilename, ofstream::out | ofstream::binary);
+
+        if (outFile.is_open())
+        {
+            // Some statistics
+            size_t bytesRead  = 0;
+            size_t totalBytes = 0;
+            size_t numChunks  = 0;
+
+            // Write whatever content we already have to output.
+            if (response.size() > 0)
+            {
+                numChunks++;
+                totalBytes = response.size();
+                outFile << &response;
+            }
+
+            // Read until EOF, writing data to output as we go.
+            do
+            {
+                bytesRead = asio::read(socket,
+                                       response,
+                                       asio::transfer_at_least(1),
+                                       error);
+                if (bytesRead)
+                {
+                    numChunks++;
+                    totalBytes += bytesRead;
+                    outFile << &response;
+                }
+            } while (bytesRead);
+
+            cout << "TotalBytes read: " << totalBytes << " in " << numChunks << " chunks." << endl;
+            outFile.close();
+        }
+        else
+        {
+            log("File cannot be opened for writing in Utils::httpGet: %s\n",
+                outFolderFilename.c_str());
+            exit(1);
+        }
     }
-
-    asio::streambuf request;
-    ostream         request_stream(&request);
-
-    request_stream << "GET " << getCommand << " HTTP/1.0\r\n";
-    request_stream << "Host: " << serverName << "\r\n";
-    request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: close\r\n\r\n";
-
-    // Send the request.
-    asio::write(socket, request);
-
-    // Read the response status line.
-    asio::streambuf response;
-    asio::read_until(socket, response, "\r\n");
-
-    // Check that response is OK.
-    istream response_stream(&response);
-    string  http_version;
-    response_stream >> http_version;
-    uint status_code;
-    response_stream >> status_code;
-    string status_message;
-    getline(response_stream, status_message);
-
-    if (status_code != 200)
+    catch (exception& e)
     {
-        log("Utils", "HTTP Response returned status code: %u", status_code);
-        return;
+        log("Exception in Utils::httpGet: %s\n", e.what());
+        exit(1);
     }
-
-    // Read the response headers, which are terminated by a blank line.
-    asio::read_until(socket, response, "\r\n\r\n");
-
-    // Process the response headers.
-    string header;
-    while (std::getline(response_stream, header) && header != "\r")
+}
+//-----------------------------------------------------------------------------
+/*! Uploads a file to a httpURL
+*/
+void Utils::httpPost(const string& uploadFile, const string& httpURL)
+{
+    try
     {
+        if (!fileExists(uploadFile))
+        {
+            log("Upload file doesn't exist in Utils::httpGet: %s\n",
+                uploadFile.c_str());
+            exit(1);
+        }
+
+        ifstream      fupload(uploadFile.c_str(), ios::binary);
+        ostringstream buffer;
+        buffer << fupload.rdbuf();
+        string content(buffer.str());
+
+        // Remove "http://"
+        string url = httpURL;
+        Utils::replaceString(url, "http://", "");
+
+        // Get server name and get command
+        string serverName  = url.substr(0, url.find('/'));
+        string putCommand  = url.substr(url.find('/'), url.length());
+        string outFilename = url.substr(url.find_last_of('/') + 1, url.length());
+
+        asio::io_service io_service;
+
+        // Get a list of endpoints corresponding to the server name.
+        tcp::resolver           resolver(io_service);
+        tcp::resolver::query    query(serverName, "http");
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        tcp::resolver::iterator end;
+
+        // Try each endpoint until we successfully establish a connection.
+        tcp::socket      socket(io_service);
+        asio::error_code error = asio::error::host_not_found;
+        while (error && endpoint_iterator != end)
+        {
+            socket.close();
+            socket.connect(*endpoint_iterator++, error);
+        }
+
+        asio::streambuf request;
+        ostream         request_stream(&request);
+
+        request_stream << "POST " << putCommand << " HTTP/1.0\r\n";
+        request_stream << "Host: " << serverName << "\r\n";
+        request_stream << "User-Agent: HTTPTool/1.0\r\n";
+        request_stream << "Content-Type: image/png\r\n";
+        request_stream << "Content-Disposition: attachment;name=file;filename=app-Demo-Skybox.png\r\n";
+        request_stream << "Content-Length: " << content.length() << "\r\n";
+        request_stream << "Accept: */*\r\n";
+        request_stream << "Connection: close\r\n\r\n";
+        request_stream << content;
+
+        // Send the request.
+        asio::write(socket, request);
+
+        // Read the response status line.
+        asio::streambuf response;
+        asio::read_until(socket, response, "\r\n");
+
+        // Check that response is OK.
+        istream response_stream(&response);
+        string  httpVersion;
+        response_stream >> httpVersion;
+        unsigned int statusCode;
+        response_stream >> statusCode;
+        string statusMsg;
+        getline(response_stream, statusMsg);
+        statusMsg = trimString(statusMsg);
+        replaceString(statusMsg, "\r", "");
+        replaceString(statusMsg, "\n", "");
+
+        // Check HTTP response status (400 means bad request)
+        if (statusCode != 200)
+        {
+            log("httpPost: HTTP Response returned status code: %d (%s)\n",
+                statusCode,
+                statusMsg.c_str());
+            return;
+        }
+
+        cout << endl
+             << "Http-Status: " << statusCode << endl;
+
+        // Read the response headers, which are terminated by a blank line.
+        asio::read_until(socket, response, "\r\n\r\n");
+
+        // Process the response headers.
+        string headerLine;
+        while (std::getline(response_stream, headerLine) && headerLine != "\r")
+        {
+            size_t splitPos = headerLine.find_first_of(':');
+            string info     = headerLine.substr(0, splitPos);
+            string value    = headerLine.substr(splitPos + 2);
+            cout << info << ":" << value << endl;
+        }
     }
-
-    ofstream outFile(outFilename, ofstream::out | ofstream::binary);
-
-    // Write whatever content we already have to output.
-    if (response.size() > 0)
+    catch (exception& e)
     {
-        outFile << &response;
-    }
-
-    // Read until EOF, writing data to output as we go.
-    while (asio::read(socket, response, asio::transfer_at_least(1), error))
-    {
-        outFile << &response;
+        log("Exception in Utils::httpGet: %s\n", e.what());
     }
 }
 //-----------------------------------------------------------------------------

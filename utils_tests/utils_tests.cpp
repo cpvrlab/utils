@@ -27,15 +27,17 @@ int main(int argc, char* argv[])
     for (auto& file : Utils::getFileNamesInDir(cwd))
         cout << "                      " << file << endl;
     vector<string> pathSplits;
-    Utils::split(cwd, '/', pathSplits);
+    Utils::splitString(cwd, '/', pathSplits);
     cout << "String splitting    : ";
     for (auto& split : pathSplits)
         cout << split << "-";
     cout << endl;
 
-    Utils::httpGet("http://cpvrlab.github.io/SLProject_doc/images/app-Demo-Skybox.png");
-    Utils::httpGet("http://pallas.bfh.ch/test/Christoffel.zip");
-
+    Utils::httpGet("http://cpvrlab.github.io/SLProject_doc/images/app-Demo-Skybox.png", awd);
+    Utils::httpGet("http://pallas.bfh.ch/test/Christoffel.zip", awd);
+    Utils::httpPost(awd + "app-Demo-Skybox.png",
+                   "http://pallas.bfh.ch/libs/app-Demo-Skybox.png");
+    //upload:FaAdbD3F2a@pallas.bfh.ch
     return 0;
 }
 //-----------------------------------------------------------------------------

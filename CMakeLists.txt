@@ -14,4 +14,4 @@ include(cmake/CompileOptions.cmake)
 include(cmake/PlatformLinkLibs.cmake)
 
 add_subdirectory(lib-Utils)
-add_subdirectory(tests)
+add_subdirectory(utils_tests)
