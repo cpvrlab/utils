@@ -9,6 +9,7 @@
 //#############################################################################
 
 #include <Utils.h>
+#include <FTPClient.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -36,8 +37,12 @@ int main(int argc, char* argv[])
     Utils::httpGet("http://cpvrlab.github.io/SLProject_doc/images/app-Demo-Skybox.png", awd);
     Utils::httpGet("http://pallas.bfh.ch/test/Christoffel.zip", awd);
     Utils::httpPost(awd + "app-Demo-Skybox.png",
-                   "http://pallas.bfh.ch/libs/app-Demo-Skybox.png");
+                    "http://pallas.bfh.ch/libs/app-Demo-Skybox.png");
     //upload:FaAdbD3F2a@pallas.bfh.ch
+
+    FTPClient client;
+    client.connect("pallas.bfh.ch", "21");
+    client.login("upload", "FaAdbD3F2a");
     return 0;
 }
 //-----------------------------------------------------------------------------

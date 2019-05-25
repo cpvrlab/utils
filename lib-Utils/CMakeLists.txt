@@ -17,15 +17,26 @@ set(compile_definitions
 	ASIO_HAS_STD_ADDRESSOF
 )
 
-set(headers ${headers} ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h)
-set(sources ${sources} ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp)
+set(headers ${headers}
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPClient.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPConnection.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPCodes.h
+)
+set(sources ${sources}
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPClient.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPConnection.cpp
+)
 
 #==============================================================================
 if("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS")
     set(platform_specific_include_dirs
         ${UTILS_ROOT}/thirdparty/dirent)
-    set(headers ${headers} ${UTILS_ROOT}/thirdparty/dirent/dirent.h)
-    set(sources ${sources} ${UTILS_ROOT}/thirdparty/dirent/dirent.c)
+    set(headers ${headers}
+        ${UTILS_ROOT}/thirdparty/dirent/dirent.h)
+    set(sources ${sources}
+        ${UTILS_ROOT}/thirdparty/dirent/dirent.c)
 elseif("${SYSTEM_NAME_UPPER}" STREQUAL "ANDROID") #----------------------------
     set(platform_specific_include_dirs
         ${UTILS_ROOT}/thirdparty/dirent)
@@ -49,6 +60,7 @@ target_include_directories(${target}
     PRIVATE
 
     PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/source
     ${platform_specific_include_dirs}
     ${UTILS_ROOT}/thirdparty/asio/include
     ${DEFAULT_INCLUDE_DIRECTORIES}
