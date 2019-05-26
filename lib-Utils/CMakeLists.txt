@@ -15,18 +15,16 @@ set(compile_definitions
 	ASIO_HAS_STD_TYPE_TRAITS
 	ASIO_HAS_STD_SHARED_PTR
 	ASIO_HAS_STD_ADDRESSOF
+    NOSSL
 )
 
 set(headers ${headers}
     ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPClient.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPConnection.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPCodes.h
+    ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.h
 )
 set(sources ${sources}
     ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPClient.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/FTPConnection.cpp
+    ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.cpp
 )
 
 #==============================================================================
@@ -63,6 +61,7 @@ target_include_directories(${target}
     ${CMAKE_CURRENT_SOURCE_DIR}/source
     ${platform_specific_include_dirs}
     ${UTILS_ROOT}/thirdparty/asio/include
+    ${UTILS_ROOT}/thirdparty/ftplibpp
     ${DEFAULT_INCLUDE_DIRECTORIES}
 
     INTERFACE

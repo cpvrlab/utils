@@ -21,7 +21,6 @@ using namespace std;
 class Utils
 {
     public:
-
     ///////////////////////////////
     // String Handling Functions //
     ///////////////////////////////
@@ -59,7 +58,6 @@ class Utils
     //! Returns the inputDir string with unified forward slashes, e.g.: "dirA/dirB/"
     static string unifySlashes(const string& inputDir);
 
-
     /////////////////////////////
     // File Handling Functions //
     /////////////////////////////
@@ -82,6 +80,9 @@ class Utils
     //! Returns true if a directory exists.
     static bool dirExists(const string& path);
 
+    //! Returns the file size in bytes
+    static unsigned int getFileSize(const string& filename);
+
     //! Creates a directory with given path
     static void makeDir(const string& path);
 
@@ -99,8 +100,6 @@ class Utils
 
     //! Deletes a file on the filesystem
     static bool deleteFile(string& pathfilename);
-
-
 
     ///////////////////////
     // Logging Functions //
@@ -124,17 +123,12 @@ class Utils
     //! Returns in release config the max. NO. of threads otherwise 1
     static unsigned int maxThreads();
 
-
-
     ////////////////////////////////
     // Network Handling Functions //
     ////////////////////////////////
 
     //! Download a file from an http url into the outFile
     static void httpGet(const string& httpURL, const string& outFolder = "");
-
-    //! Upload a file to an http url
-    static void httpPost(const string& uploadFile, const string& httpURL);
 };
 //-----------------------------------------------------------------------------
 #endif

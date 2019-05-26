@@ -373,6 +373,22 @@ bool Utils::fileExists(const string& pathfilename)
 #endif
 }
 //-----------------------------------------------------------------------------
+//! Returns the file size in bytes
+unsigned int Utils::getFileSize(const string& filename)
+{
+#if defined(USE_STD_FILESYSTEM)
+    if (fs::exists(pathfilename))
+        return fs::file_size(pathfilename);
+    else
+        return 0;
+#else
+    struct stat st;
+    if (stat(filename.c_str(), &st) != 0)
+        return 0;
+    return (unsigned int)st.st_size;
+#endif
+}
+//-----------------------------------------------------------------------------
 //! Returns the writable configuration directory with trailing forward slash
 string Utils::getAppsWritableDir()
 {
@@ -593,8 +609,7 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
             return;
         }
 
-        cout << endl
-             << "Http-Status: " << statusCode << endl;
+        //cout << endl << "Http-Status: " << statusCode << endl;
 
         // Read the response headers, which are terminated by a blank line.
         asio::read_until(socket, response, "\r\n\r\n");
@@ -606,7 +621,7 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
             size_t splitPos = headerLine.find_first_of(':');
             string info     = headerLine.substr(0, splitPos);
             string value    = headerLine.substr(splitPos + 2);
-            cout << info << ":" << value << endl;
+            //cout << info << ":" << value << endl;
         }
 
         // Build full outFolderFilename
@@ -673,113 +688,6 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
     {
         log("Exception in Utils::httpGet: %s\n", e.what());
         exit(1);
-    }
-}
-//-----------------------------------------------------------------------------
-/*! Uploads a file to a httpURL
-*/
-void Utils::httpPost(const string& uploadFile, const string& httpURL)
-{
-    try
-    {
-        if (!fileExists(uploadFile))
-        {
-            log("Upload file doesn't exist in Utils::httpGet: %s\n",
-                uploadFile.c_str());
-            exit(1);
-        }
-
-        ifstream      fupload(uploadFile.c_str(), ios::binary);
-        ostringstream buffer;
-        buffer << fupload.rdbuf();
-        string content(buffer.str());
-
-        // Remove "http://"
-        string url = httpURL;
-        Utils::replaceString(url, "http://", "");
-
-        // Get server name and get command
-        string serverName  = url.substr(0, url.find('/'));
-        string putCommand  = url.substr(url.find('/'), url.length());
-        string outFilename = url.substr(url.find_last_of('/') + 1, url.length());
-
-        asio::io_service io_service;
-
-        // Get a list of endpoints corresponding to the server name.
-        tcp::resolver           resolver(io_service);
-        tcp::resolver::query    query(serverName, "http");
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        tcp::resolver::iterator end;
-
-        // Try each endpoint until we successfully establish a connection.
-        tcp::socket      socket(io_service);
-        asio::error_code error = asio::error::host_not_found;
-        while (error && endpoint_iterator != end)
-        {
-            socket.close();
-            socket.connect(*endpoint_iterator++, error);
-        }
-
-        asio::streambuf request;
-        ostream         request_stream(&request);
-
-        request_stream << "POST " << putCommand << " HTTP/1.0\r\n";
-        request_stream << "Host: " << serverName << "\r\n";
-        request_stream << "User-Agent: HTTPTool/1.0\r\n";
-        request_stream << "Content-Type: image/png\r\n";
-        request_stream << "Content-Disposition: attachment;name=file;filename=app-Demo-Skybox.png\r\n";
-        request_stream << "Content-Length: " << content.length() << "\r\n";
-        request_stream << "Accept: */*\r\n";
-        request_stream << "Connection: close\r\n\r\n";
-        request_stream << content;
-
-        // Send the request.
-        asio::write(socket, request);
-
-        // Read the response status line.
-        asio::streambuf response;
-        asio::read_until(socket, response, "\r\n");
-
-        // Check that response is OK.
-        istream response_stream(&response);
-        string  httpVersion;
-        response_stream >> httpVersion;
-        unsigned int statusCode;
-        response_stream >> statusCode;
-        string statusMsg;
-        getline(response_stream, statusMsg);
-        statusMsg = trimString(statusMsg);
-        replaceString(statusMsg, "\r", "");
-        replaceString(statusMsg, "\n", "");
-
-        // Check HTTP response status (400 means bad request)
-        if (statusCode != 200)
-        {
-            log("httpPost: HTTP Response returned status code: %d (%s)\n",
-                statusCode,
-                statusMsg.c_str());
-            return;
-        }
-
-        cout << endl
-             << "Http-Status: " << statusCode << endl;
-
-        // Read the response headers, which are terminated by a blank line.
-        asio::read_until(socket, response, "\r\n\r\n");
-
-        // Process the response headers.
-        string headerLine;
-        while (std::getline(response_stream, headerLine) && headerLine != "\r")
-        {
-            size_t splitPos = headerLine.find_first_of(':');
-            string info     = headerLine.substr(0, splitPos);
-            string value    = headerLine.substr(splitPos + 2);
-            cout << info << ":" << value << endl;
-        }
-    }
-    catch (exception& e)
-    {
-        log("Exception in Utils::httpGet: %s\n", e.what());
     }
 }
 //-----------------------------------------------------------------------------
