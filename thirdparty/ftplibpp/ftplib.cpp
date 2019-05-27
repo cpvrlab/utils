@@ -652,11 +652,16 @@ int ftplib::FtpAccess(const char* path, accesstype type, transfermode mode, ftph
     char buf[256];
     int  dir;
 
-    if ((path == nullptr) && ((type == ftplib::filewrite) || (type == ftplib::fileread) || (type == ftplib::filereadappend) || (type == ftplib::filewriteappend)))
+    if ((path == nullptr) &&
+        ((type == ftplib::filewrite) ||
+         (type == ftplib::fileread) ||
+         (type == ftplib::filereadappend) ||
+         (type == ftplib::filewriteappend)))
     {
         sprintf(nControl->response, "Missing path argument for file transfer\n");
         return 0;
     }
+
     sprintf(buf, "TYPE %c", mode);
     if (!FtpSendCmd(buf, '2', nControl)) return 0;
 
@@ -684,6 +689,7 @@ int ftplib::FtpAccess(const char* path, accesstype type, transfermode mode, ftph
             sprintf(nControl->response, "Invalid open type %d\n", type);
             return 0;
     }
+
     if (path != nullptr)
     {
         int i    = strlen(buf);
@@ -699,7 +705,9 @@ int ftplib::FtpAccess(const char* path, accesstype type, transfermode mode, ftph
 
     if (nControl->cmode == ftplib::port)
     {
-        if (FtpOpenPort(nControl, nData, mode, dir, buf) == -1) return 0;
+        if (FtpOpenPort(nControl, nData, mode, dir, buf) == -1)
+            return 0;
+
         if (!FtpAcceptConnection(*nData, nControl))
         {
             FtpClose(*nData);
@@ -1270,12 +1278,22 @@ int ftplib::FtpXfer(const char* localfile, const char* path, ftphandle* nControl
         local = fopen64(localfile, ac);
         if (local == nullptr)
         {
-            strncpy(nControl->response, strerror(errno), sizeof(nControl->response));
+            strncpy(nControl->response,
+                    strerror(errno),
+                    sizeof(nControl->response));
             return 0;
         }
-        if (type == ftplib::filewriteappend) fseeko64(local, mp_ftphandle->offset, SEEK_SET);
+
+        if (type == ftplib::filewriteappend)
+            fseeko64(local, mp_ftphandle->offset, SEEK_SET);
     }
-    if (local == nullptr) local = ((type == ftplib::filewrite) || (type == ftplib::filewriteappend)) ? stdin : stdout;
+
+    if (local == nullptr)
+        local = ((type == ftplib::filewrite) ||
+                 (type == ftplib::filewriteappend))
+                  ? stdin
+                  : stdout;
+
     if (!FtpAccess(path, type, mode, nControl, &nData))
     {
         if (localfile != nullptr) fclose(local);
@@ -1283,6 +1301,7 @@ int ftplib::FtpXfer(const char* localfile, const char* path, ftphandle* nControl
     }
 
     dbuf = static_cast<char*>(malloc(FTPLIB_BUFSIZ));
+
     if ((type == ftplib::filewrite) || (type == ftplib::filewriteappend))
     {
         while ((l = fread(dbuf, 1, FTPLIB_BUFSIZ, local)) > 0)

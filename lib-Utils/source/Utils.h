@@ -128,7 +128,7 @@ class Utils
     ////////////////////////////////
 
     //! Download a file from an http url into the outFile
-    static void httpGet(const string& httpURL, const string& outFolder = "");
+    static uint64_t httpGet(const string& httpURL, const string& outFolder = "");
 };
 //-----------------------------------------------------------------------------
 #endif
