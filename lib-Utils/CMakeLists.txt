@@ -11,11 +11,12 @@ set(platform_specific_include_directories)
 
 set(compile_definitions
     ${compile_definitions}
-	ASIO_STANDALONE
-	ASIO_HAS_STD_TYPE_TRAITS
-	ASIO_HAS_STD_SHARED_PTR
-	ASIO_HAS_STD_ADDRESSOF
+    ASIO_STANDALONE
+    ASIO_HAS_STD_TYPE_TRAITS
+    ASIO_HAS_STD_SHARED_PTR
+    ASIO_HAS_STD_ADDRESSOF
     NOSSL
+    NOLFS
 )
 
 set(headers ${headers}
