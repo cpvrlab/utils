@@ -66,7 +66,7 @@ typedef struct x509_st    X509;
 #    define _FTPLIB_SSL_CLIENT_METHOD_ TLSv1_2_client_method
 #endif
 
-using namespace std;
+//using namespace std;
 
 //SSL
 typedef struct ssl_st     SSL;

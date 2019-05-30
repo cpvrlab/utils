@@ -8,8 +8,8 @@
 //             Please visit: http://opensource.org/licenses/GPL-3.0
 //#############################################################################
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef CPLVRLAB_UTILS_H
+#define CPLVRLAB_UTILS_H
 
 #include <string>
 #include <vector>

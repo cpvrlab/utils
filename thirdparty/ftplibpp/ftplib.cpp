@@ -5,6 +5,7 @@
 #    define _LARGEFILE64_SOURCE
 #endif
 
+#define NOSSL
 #ifndef NOSSL
 #    include <openssl/ssl.h>
 #endif
@@ -56,8 +57,6 @@ typedef int socklen_t;
 #    define memccpy _memccpy
 #    define strdup _strdup
 #endif
-
-using namespace std;
 
 /* socket values */
 //#define SETSOCKOPT_OPTVAL_TYPE (void *)
