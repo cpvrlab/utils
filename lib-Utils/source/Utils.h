@@ -8,8 +8,8 @@
 //             Please visit: http://opensource.org/licenses/GPL-3.0
 //#############################################################################
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef CPLVRLAB_UTILS_H
+#define CPLVRLAB_UTILS_H
 
 #include <string>
 #include <vector>
@@ -128,7 +128,7 @@ class Utils
     ////////////////////////////////
 
     //! Download a file from an http url into the outFile
-    static void httpGet(const string& httpURL, const string& outFolder = "");
+    static uint64_t httpGet(const string& httpURL, const string& outFolder = "");
 };
 //-----------------------------------------------------------------------------
 #endif

@@ -376,7 +376,7 @@ bool Utils::fileExists(const string& pathfilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the file size in bytes
-unsigned int Utils::getFileSize(const string& filename)
+unsigned int Utils::getFileSize(const string& pathfilename)
 {
 #if defined(USE_STD_FILESYSTEM)
     if (fs::exists(pathfilename))
@@ -385,7 +385,7 @@ unsigned int Utils::getFileSize(const string& filename)
         return 0;
 #else
     struct stat st;
-    if (stat(filename.c_str(), &st) != 0)
+    if (stat(pathfilename.c_str(), &st) != 0)
         return 0;
     return (unsigned int)st.st_size;
 #endif
@@ -477,7 +477,7 @@ void Utils::log(const char* format,
     vsprintf(log, format, argptr);
     va_end(argptr);
 
-#if defined(SL_OS_ANDROID)
+#if defined(ANDROID) || defined(ANDROID_NDK)
     __android_log_print(ANDROID_LOG_INFO, logAppName.c_str(), log);
 #else
     cout << log << std::flush;
@@ -545,7 +545,7 @@ unsigned int Utils::maxThreads()
 /*! Downloads the file at httpURL with the same name in the outFolder. If the
 outFolder is empty it is stored in the current working directory.
 */
-void Utils::httpGet(const string& httpURL, const string& outFolder)
+uint64_t Utils::httpGet(const string& httpURL, const string& outFolder)
 {
     try
     {
@@ -608,7 +608,7 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
             log("httpGet: HTTP Response returned status code: %d (%s)\n",
                 statusCode,
                 statusMsg.c_str());
-            return;
+            return 0;
         }
 
         //cout << endl << "Http-Status: " << statusCode << endl;
@@ -676,8 +676,9 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
                 }
             } while (bytesRead);
 
-            cout << "TotalBytes read: " << totalBytes << " in " << numChunks << " chunks." << endl;
+            //cout << "TotalBytes read: " << totalBytes << " in " << numChunks << " chunks." << endl;
             outFile.close();
+            return (uint64_t)totalBytes;
         }
         else
         {
@@ -691,5 +692,6 @@ void Utils::httpGet(const string& httpURL, const string& outFolder)
         log("Exception in Utils::httpGet: %s\n", e.what());
         exit(1);
     }
+    return 0;
 }
 //-----------------------------------------------------------------------------
