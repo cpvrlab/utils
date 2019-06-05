@@ -14,7 +14,8 @@ if("${SYSTEM_NAME_UPPER}" STREQUAL "LINUX")
         Xi
         Xinerama
         Xxf86vm
-        Xcursor)
+        Xcursor
+        pthread)
 
 elseif("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS") #----------------------------
     set(PlatformLinkLibs

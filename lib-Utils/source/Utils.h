@@ -84,7 +84,7 @@ class Utils
     static unsigned int getFileSize(const string& filename);
 
     //! Creates a directory with given path
-    static void makeDir(const string& path);
+    static bool makeDir(const string& path);
 
     //! RemoveDir deletes a directory with given path
     static void removeDir(const string& path);

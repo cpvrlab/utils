@@ -328,7 +328,7 @@ bool Utils::dirExists(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Creates a directory with given path
-void Utils::makeDir(const string& path)
+bool Utils::makeDir(const string& path)
 {
 #if defined(USE_STD_FILESYSTEM)
     fs::create_directories(path);
@@ -336,7 +336,9 @@ void Utils::makeDir(const string& path)
 #    if defined(_WIN32)
     _mkdir(path.c_str());
 #    else
-    mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    int  failed = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    bool result = !failed;
+    return result;
 #    endif
 #endif
 }
