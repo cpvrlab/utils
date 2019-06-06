@@ -46,8 +46,17 @@ class Utils
     //! Replaces in the source string the from string by the to string
     static void replaceString(string& source, const string& from, const string& to);
 
-    //! Returns local time as string
+    //! Returns local time as string like "Wed Feb 13 15:46:11 2019"
     static string getLocalTimeString();
+
+    //! Returns local time as string like "13.02.19-15:46"
+    static string getDateTime1String();
+
+    //! Returns local time as string like "20190213-154611"
+    static string getDateTime2String();
+
+    //! Returns the computer name
+    static string getHostName();
 
     //! Returns a formatted string as sprintf
     static string formatString(const string fmt_str, ...);

@@ -144,7 +144,7 @@ void Utils::replaceString(string&       source,
     source.swap(newString);
 }
 //-----------------------------------------------------------------------------
-//! Returns local time as string
+//! Returns local time as string like "Wed Feb 13 15:46:11 2019"
 string Utils::getLocalTimeString()
 {
     time_t tm;
@@ -153,6 +153,38 @@ string Utils::getLocalTimeString()
     char       buf[1024];
     strftime(buf, sizeof(buf), "%c", t2);
     return string(buf);
+}
+//-----------------------------------------------------------------------------
+//! Returns local time as string like "13.02.19-15:46"
+string Utils::getDateTime1String()
+{
+    time_t tm;
+    time(&tm);
+    struct tm* t = localtime(&tm);
+
+    static char shortTime[50];
+    sprintf(shortTime, "%.2d.%.2d.%.2d-%.2d:%.2d", t->tm_mday, t->tm_mon, t->tm_year - 100, t->tm_hour, t->tm_min);
+
+    return string(shortTime);
+}
+//-----------------------------------------------------------------------------
+//! Returns local time as string like "20190213-154611"
+string Utils::getDateTime2String()
+{
+    time_t tm;
+    time(&tm);
+    struct tm* t = localtime(&tm);
+
+    static char shortTime[50];
+    sprintf(shortTime, "%.4d%.2d%.2d-%.2d%.2d%.2d", 1900 + t->tm_year, t->tm_mon, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+
+    return string(shortTime);
+}
+//-----------------------------------------------------------------------------
+//! Returns the hostname from boost asio
+string Utils::getHostName()
+{
+    return asio::ip::host_name();
 }
 //-----------------------------------------------------------------------------
 //! Returns a formatted string as sprintf
@@ -331,10 +363,10 @@ bool Utils::dirExists(const string& path)
 bool Utils::makeDir(const string& path)
 {
 #if defined(USE_STD_FILESYSTEM)
-    fs::create_directories(path);
+    return fs::create_directories(path);
 #else
 #    if defined(_WIN32)
-    _mkdir(path.c_str());
+    return _mkdir(path.c_str());
 #    else
     int  failed = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     bool result = !failed;
