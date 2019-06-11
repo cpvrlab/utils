@@ -46,6 +46,9 @@ class Utils
     //! Replaces in the source string the from string by the to string
     static void replaceString(string& source, const string& from, const string& to);
 
+    //! replaces non-filename characters: /\|?%*:"<>'
+    static string replaceNonFilenameChars(string source, const char replaceChar = '-');
+
     //! Returns local time as string like "Wed Feb 13 15:46:11 2019"
     static string getLocalTimeString();
 

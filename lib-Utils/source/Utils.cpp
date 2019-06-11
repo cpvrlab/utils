@@ -144,6 +144,20 @@ void Utils::replaceString(string&       source,
     source.swap(newString);
 }
 //-----------------------------------------------------------------------------
+//! deletes non-filename characters: /\|?%*:"<>'
+string Utils::replaceNonFilenameChars(string src, const char replaceChar)
+{
+    std::replace(src.begin(), src.end(), '/', replaceChar);
+    std::replace(src.begin(), src.end(), '\\', replaceChar);
+    std::replace(src.begin(), src.end(), '|', replaceChar);
+    std::replace(src.begin(), src.end(), '?', replaceChar);
+    std::replace(src.begin(), src.end(), '%', replaceChar);
+    std::replace(src.begin(), src.end(), '*', replaceChar);
+    std::replace(src.begin(), src.end(), ':', replaceChar);
+    std::replace(src.begin(), src.end(), '"', replaceChar);
+    return src;
+}
+//-----------------------------------------------------------------------------
 //! Returns local time as string like "Wed Feb 13 15:46:11 2019"
 string Utils::getLocalTimeString()
 {
