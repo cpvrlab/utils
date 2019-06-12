@@ -36,9 +36,6 @@ if("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS")
         ${UTILS_ROOT}/thirdparty/dirent/dirent.h)
     set(sources ${sources}
         ${UTILS_ROOT}/thirdparty/dirent/dirent.c)
-elseif("${SYSTEM_NAME_UPPER}" STREQUAL "ANDROID") #----------------------------
-    set(platform_specific_include_dirs
-        ${UTILS_ROOT}/thirdparty/dirent)
 endif()
 #==============================================================================
 
