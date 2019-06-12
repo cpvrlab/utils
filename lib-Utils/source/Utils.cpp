@@ -177,7 +177,13 @@ string Utils::getDateTime1String()
     struct tm* t = localtime(&tm);
 
     static char shortTime[50];
-    sprintf(shortTime, "%.2d.%.2d.%.2d-%.2d:%.2d", t->tm_mday, t->tm_mon, t->tm_year - 100, t->tm_hour, t->tm_min);
+    sprintf(shortTime,
+            "%.2d.%.2d.%.2d-%.2d:%.2d",
+            t->tm_mday,
+            t->tm_mon,
+            t->tm_year - 100,
+            t->tm_hour,
+            t->tm_min);
 
     return string(shortTime);
 }
@@ -190,7 +196,14 @@ string Utils::getDateTime2String()
     struct tm* t = localtime(&tm);
 
     static char shortTime[50];
-    sprintf(shortTime, "%.4d%.2d%.2d-%.2d%.2d%.2d", 1900 + t->tm_year, t->tm_mon, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+    sprintf(shortTime,
+            "%.4d%.2d%.2d-%.2d%.2d%.2d",
+            1900 + t->tm_year,
+            t->tm_mon,
+            t->tm_mday,
+            t->tm_hour,
+            t->tm_min,
+            t->tm_sec);
 
     return string(shortTime);
 }
@@ -211,7 +224,7 @@ string Utils::formatString(const string fmt_str, ...)
     va_list            ap;
     while (1)
     {
-        formatted.reset(new char[n]); /* Wrap the plain char array into the unique_ptr */
+        formatted.reset(new char[n]);
         strcpy(&formatted[0], fmt_str.c_str());
         va_start(ap, fmt_str);
         final_n = vsnprintf(&formatted[0], (unsigned long)n, fmt_str.c_str(), ap);
