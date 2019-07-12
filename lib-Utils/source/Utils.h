@@ -70,6 +70,13 @@ class Utils
     //! Returns the inputDir string with unified forward slashes, e.g.: "dirA/dirB/"
     static string unifySlashes(const string& inputDir);
 
+    //! Returns true if content of file could be put in a vector of strings
+    static bool getFileContent(const string fileName,
+                               vector<string> & vecOfStrings);
+
+    //! Naturally compares two strings (used for filename sorting)
+    static bool compareNatural(const string& a, const string& b);
+
     /////////////////////////////
     // File Handling Functions //
     /////////////////////////////

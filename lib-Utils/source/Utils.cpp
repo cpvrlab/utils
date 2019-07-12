@@ -285,6 +285,169 @@ string Utils::getPath(const string& pathFilename)
     }
     return pathFilename;
 }
+//-----------------------------------------------------------------------------
+//! Returns true if content of file could be put in a vector of strings
+bool Utils::getFileContent(const string    fileName,
+                           vector<string>& vecOfStrings)
+{
+
+    // Open the File
+    std::ifstream in(fileName.c_str());
+
+    // Check if object is valid
+    if (!in)
+    {
+        std::cerr << "Cannot open the File : " << fileName << std::endl;
+        return false;
+    }
+
+    // Read the next line from File untill it reaches the end.
+    std::string str;
+    while (std::getline(in, str))
+    {
+        // Line contains string of length > 0 then save it in vector
+        if (str.size() > 0)
+            vecOfStrings.push_back(str);
+    }
+
+    //Close The File
+    in.close();
+    return true;
+}
+//-----------------------------------------------------------------------------
+//! Naturally compares two strings (used for filename sorting)
+/*! String comparison as most filesystem do it.
+Source: https://www.o-rho.com/naturalsort
+
+std::sort   compareNatural
+---------   --------------
+1.txt       1.txt
+10.txt      1_t.txt
+1_t.txt     10.txt
+20          20
+20.txt      20.txt
+ABc         ABc
+aBCd        aBCd
+aBCd(01)    aBCd(1)
+aBCd(1)     aBCd(01)
+aBCd(12)    aBCd(2)
+aBCd(2)     aBCd(12)
+aBc         aBc
+aBcd        aBcd
+aaA         aaA
+aaa         aaa
+z10.txt     z2.txt
+z100.txt    z10.txt
+z2.txt      z100.txt
+ */
+bool Utils::compareNatural(const string& a, const string& b)
+{
+    const char*          p1         = a.c_str();
+    const char*          p2         = b.c_str();
+    const unsigned short st_scan    = 0;
+    const unsigned short st_alpha   = 1;
+    const unsigned short st_numeric = 2;
+    unsigned short       state      = st_scan;
+    const char*          numstart1  = 0;
+    const char*          numstart2  = 0;
+    const char*          numend1    = 0;
+    const char*          numend2    = 0;
+    unsigned long        sz1        = 0;
+    unsigned long        sz2        = 0;
+
+    while (*p1 && *p2)
+    {
+        switch (state)
+        {
+            case st_scan:
+                if (!isdigit(*p1) && !isdigit(*p2))
+                {
+                    state = st_alpha;
+                    if (*p1 == *p2)
+                    {
+                        p1++;
+                        p2++;
+                    }
+                    else
+                        return *p1 < *p2;
+                }
+                else if (isdigit(*p1) && !isdigit(*p2))
+                    return true;
+                else if (!isdigit(*p1) && isdigit(*p2))
+                    return false;
+                else
+                {
+                    state = st_numeric;
+                    if (sz1 == 0)
+                        while (*p1 == '0')
+                        {
+                            p1++;
+                            sz1++;
+                        }
+                    else
+                        while (*p1 == '0') p1++;
+                    if (sz2 == 0)
+                        while (*p2 == '0')
+                        {
+                            p2++;
+                            sz2++;
+                        }
+                    else
+                        while (*p2 == '0') p2++;
+                    if (sz1 == sz2)
+                    {
+                        sz1 = 0;
+                        sz2 = 0;
+                    };
+                    if (!isdigit(*p1)) p1--;
+                    if (!isdigit(*p2)) p2--;
+                    numstart1 = p1;
+                    numstart2 = p2;
+                    numend1   = numstart1;
+                    numend2   = numstart2;
+                }
+                break;
+            case st_alpha:
+                if (!isdigit(*p1) && !isdigit(*p2))
+                {
+                    if (*p1 == *p2)
+                    {
+                        p1++;
+                        p2++;
+                    }
+                    else
+                        return *p1 < *p2;
+                }
+                else
+                    state = st_scan;
+                break;
+            case st_numeric:
+                while (isdigit(*p1)) numend1 = p1++;
+                while (isdigit(*p2)) numend2 = p2++;
+                if (numend1 - numstart1 == numend2 - numstart2 &&
+                    !strncmp(numstart1, numstart2, numend2 - numstart2 + 1))
+                    state = st_scan;
+                else
+                {
+                    if (numend1 - numstart1 != numend2 - numstart2)
+                        return numend1 - numstart1 < numend2 - numstart2;
+                    while (*numstart1 && *numstart2)
+                    {
+                        if (*numstart1 != *numstart2) return *numstart1 < *numstart2;
+                        numstart1++;
+                        numstart2++;
+                    }
+                }
+                break;
+        }
+    }
+    if (sz1 < sz2) return true;
+    if (sz1 > sz2) return false;
+    if (*p1 == 0 && *p2 != 0) return true;
+    if (*p1 != 0 && *p2 == 0) return false;
+    return false;
+}
+//-----------------------------------------------------------------------------
 
 /////////////////////////////
 // File Handling Functions //
@@ -294,9 +457,10 @@ string Utils::getPath(const string& pathFilename)
 //! Returns the filename of path-filename string
 string Utils::getFileName(const string& pathFilename)
 {
-    size_t i = 0, i1, i2;
-    i1       = pathFilename.rfind('\\', pathFilename.length());
-    i2       = pathFilename.rfind('/', pathFilename.length());
+    size_t i1, i2;
+    i1    = pathFilename.rfind('\\', pathFilename.length());
+    i2    = pathFilename.rfind('/', pathFilename.length());
+    int i = -1;
 
     if (i1 != string::npos && i2 != string::npos)
         i = max(i1, i2);
