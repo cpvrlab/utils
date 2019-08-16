@@ -306,7 +306,7 @@ bool Utils::getFileContent(const string    fileName,
     while (std::getline(in, str))
     {
         // Line contains string of length > 0 then save it in vector
-        if (str.size() > 0)
+        if (!str.empty())
             vecOfStrings.push_back(str);
     }
 
@@ -398,7 +398,7 @@ bool Utils::compareNatural(const string& a, const string& b)
                     {
                         sz1 = 0;
                         sz2 = 0;
-                    };
+                    }
                     if (!isdigit(*p1)) p1--;
                     if (!isdigit(*p2)) p2--;
                     numstart1 = p1;
