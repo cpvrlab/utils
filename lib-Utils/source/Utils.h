@@ -47,7 +47,7 @@ class Utils
     static void replaceString(string& source, const string& from, const string& to);
 
     //! replaces non-filename characters: /\|?%*:"<>'
-    static string replaceNonFilenameChars(string source, const char replaceChar = '-');
+    static string replaceNonFilenameChars(string source, char replaceChar = '-');
 
     //! Returns local time as string like "Wed Feb 13 15:46:11 2019"
     static string getLocalTimeString();
@@ -62,17 +62,17 @@ class Utils
     static string getHostName();
 
     //! Returns a formatted string as sprintf
-    static string formatString(const string fmt_str, ...);
+    static string formatString(const string& fmt_str, ...);
 
     //! Returns true if container contains the search string
-    static bool containsString(const string container, const string search);
+    static bool containsString(const string& container, const string& search);
 
     //! Returns the inputDir string with unified forward slashes, e.g.: "dirA/dirB/"
     static string unifySlashes(const string& inputDir);
 
     //! Returns true if content of file could be put in a vector of strings
-    static bool getFileContent(const string fileName,
-                               vector<string> & vecOfStrings);
+    static bool getFileContent(const string&   fileName,
+                               vector<string>& vecOfStrings);
 
     //! Naturally compares two strings (used for filename sorting)
     static bool compareNatural(const string& a, const string& b);
@@ -91,10 +91,10 @@ class Utils
     static string getFileNameWOExt(const string& pathFilename);
 
     //! Returns the file extension without dot in lower case
-    static string getFileExt(const string filename);
+    static string getFileExt(const string& filename);
 
     //! Returns a vector of storted filesnames in dirName
-    static vector<string> getFileNamesInDir(const string dirName);
+    static vector<string> getFileNamesInDir(const string& dirName);
 
     //! Returns true if a directory exists.
     static bool dirExists(const string& path);
@@ -132,11 +132,11 @@ class Utils
 
     //! Terminates the application with a message. No leak cheching.
     [[noreturn]] static void exitMsg(const char* appString,
-                                     const int   line,
+                                     int         line,
                                      const char* file);
 
     static void warnMsg(const char* appString,
-                        const int   line,
+                        int         line,
                         const char* file);
 
     //! Returns in release config the max. NO. of threads otherwise 1

@@ -2,7 +2,7 @@
 //  File:      Utils.cpp
 //  Author:    Marcus Hudritsch
 //  Date:      May 2019
-//  Codestyle: https://github.com/cpvrlab/SLProject/wiki/Coding-Style-Guidelines
+//  Codestyle: https://github.com/cpvrlab/SLProject/wiki/SLProject-Coding-Style
 //  Copyright: Marcus Hudritsch
 //             This software is provide under the GNU General Public License
 //             Please visit: http://opensource.org/licenses/GPL-3.0
@@ -18,6 +18,7 @@
 #include <string>
 #include <cstdarg>
 #include <cstring>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <thread>
@@ -79,7 +80,7 @@ string Utils::toString(double d, int roundedDecimals)
 //! Returns a string in lower case
 string Utils::toLowerString(string s)
 {
-    string cpy(s);
+    string cpy(std::move(s));
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::tolower);
     return cpy;
 }
@@ -87,7 +88,7 @@ string Utils::toLowerString(string s)
 //! Returns a string in upper case
 string Utils::toUpperString(string s)
 {
-    string cpy(s);
+    string cpy(std::move(s));
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
     return cpy;
 }
@@ -215,14 +216,14 @@ string Utils::getHostName()
 }
 //-----------------------------------------------------------------------------
 //! Returns a formatted string as sprintf
-string Utils::formatString(const string fmt_str, ...)
+string Utils::formatString(const string& fmt_str, ...)
 {
     // Reserve two times as much as the length of the fmt_str
     int                final_n, n = ((int)fmt_str.size()) * 2;
     string             str;
     unique_ptr<char[]> formatted;
     va_list            ap;
-    while (1)
+    while (true)
     {
         formatted.reset(new char[n]);
         strcpy(&formatted[0], fmt_str.c_str());
@@ -238,7 +239,7 @@ string Utils::formatString(const string fmt_str, ...)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if container contains the search string
-bool Utils::containsString(const string container, const string search)
+bool Utils::containsString(const string& container, const string& search)
 {
     return (container.find(search) != string::npos);
 }
@@ -260,7 +261,7 @@ string Utils::unifySlashes(const string& inputDir)
     }
 
     curr.append(copy);
-    if (curr.size() && curr.back() != '/')
+    if (!curr.empty() && curr.back() != '/')
         curr.append("/");
 
     return curr;
@@ -287,7 +288,7 @@ string Utils::getPath(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if content of file could be put in a vector of strings
-bool Utils::getFileContent(const string    fileName,
+bool Utils::getFileContent(const string&   fileName,
                            vector<string>& vecOfStrings)
 {
 
@@ -348,10 +349,10 @@ bool Utils::compareNatural(const string& a, const string& b)
     const unsigned short st_alpha   = 1;
     const unsigned short st_numeric = 2;
     unsigned short       state      = st_scan;
-    const char*          numstart1  = 0;
-    const char*          numstart2  = 0;
-    const char*          numend1    = 0;
-    const char*          numend2    = 0;
+    const char*          numstart1  = nullptr;
+    const char*          numstart2  = nullptr;
+    const char*          numend1    = nullptr;
+    const char*          numend2    = nullptr;
     unsigned long        sz1        = 0;
     unsigned long        sz2        = 0;
 
@@ -439,6 +440,7 @@ bool Utils::compareNatural(const string& a, const string& b)
                     }
                 }
                 break;
+            default: break;
         }
     }
     if (sz1 < sz2) return true;
@@ -487,7 +489,7 @@ string Utils::getFileNameWOExt(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the file extension without dot in lower case
-string Utils::getFileExt(const string filename)
+string Utils::getFileExt(const string& filename)
 {
     size_t i;
     i = filename.rfind('.', filename.length());
@@ -497,7 +499,7 @@ string Utils::getFileExt(const string filename)
 }
 //-----------------------------------------------------------------------------
 //! Returns a vector of storted filesnames with path in dir
-vector<string> Utils::getFileNamesInDir(const string dirName)
+vector<string> Utils::getFileNamesInDir(const string& dirName)
 {
     vector<string> filePathNames;
 
@@ -540,7 +542,7 @@ bool Utils::dirExists(const string& path)
 #if defined(USE_STD_FILESYSTEM)
     return fs::exists(path) && fs::is_directory(path);
 #else
-    struct stat info;
+    struct stat info{};
     if (stat(path.c_str(), &info) != 0)
         return false;
     else if (info.st_mode & S_IFDIR)
@@ -593,7 +595,7 @@ bool Utils::fileExists(const string& pathfilename)
 #if defined(USE_STD_FILESYSTEM)
     return fs::exists(pathfilename);
 #else
-    struct stat info;
+    struct stat info{};
     return (stat(pathfilename.c_str(), &info) == 0);
 #endif
 }
@@ -607,7 +609,7 @@ unsigned int Utils::getFileSize(const string& pathfilename)
     else
         return 0;
 #else
-    struct stat st;
+    struct stat st{};
     if (stat(pathfilename.c_str(), &st) != 0)
         return 0;
     return (unsigned int)st.st_size;
