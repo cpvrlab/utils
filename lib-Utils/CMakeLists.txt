@@ -19,14 +19,18 @@ set(compile_definitions
     NOLFS
 )
 
-set(headers ${headers}
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
-    ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.h
-)
-set(sources ${sources}
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
-    ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.cpp
-)
+set(headers
+        ${headers}
+        ${CMAKE_CURRENT_SOURCE_DIR}/source/Averaged.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/source/HighResTimer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.h
+        ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.h
+    )
+set(sources
+        ${sources}
+        ${CMAKE_CURRENT_SOURCE_DIR}/source/Utils.cpp
+        ${UTILS_ROOT}/thirdparty/ftplibpp/ftplib.cpp
+    )
 
 #==============================================================================
 if("${SYSTEM_NAME_UPPER}" STREQUAL "WINDOWS")
