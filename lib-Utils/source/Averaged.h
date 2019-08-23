@@ -32,7 +32,7 @@ class Averaged
     {
         _values.clear();
         _values.resize(numValues, zeroValue);
-        _oneOverNumValues = 1.0f / (SLfloat)_values.size();
+        _oneOverNumValues = 1.0f / (float)_values.size();
         _sum              = zeroValue;
         _average          = zeroValue;
         _currentValueNo   = 0;
