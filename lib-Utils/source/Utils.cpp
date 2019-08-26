@@ -52,13 +52,19 @@ namespace fs = std::experimental::filesystem;
 using namespace std;
 using asio::ip::tcp;
 
+//-----------------------------------------------------------------------------
+string logAppName;
+//-----------------------------------------------------------------------------
+
+namespace Utils
+{
 ///////////////////////////////
 // String Handling Functions //
 ///////////////////////////////
 
 //-----------------------------------------------------------------------------
 //! Returns a string from a float with max. one trailing zero
-string Utils::toString(float f, int roundedDecimals)
+string toString(float f, int roundedDecimals)
 {
     stringstream ss;
     ss << fixed << setprecision(roundedDecimals) << f;
@@ -68,7 +74,7 @@ string Utils::toString(float f, int roundedDecimals)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string from a double with max. one trailing zero
-string Utils::toString(double d, int roundedDecimals)
+string toString(double d, int roundedDecimals)
 {
     stringstream ss;
     ss << fixed << setprecision(roundedDecimals) << d;
@@ -78,7 +84,7 @@ string Utils::toString(double d, int roundedDecimals)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in lower case
-string Utils::toLowerString(string s)
+string toLowerString(string s)
 {
     string cpy(std::move(s));
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::tolower);
@@ -86,7 +92,7 @@ string Utils::toLowerString(string s)
 }
 //-----------------------------------------------------------------------------
 //! Returns a string in upper case
-string Utils::toUpperString(string s)
+string toUpperString(string s)
 {
     string cpy(std::move(s));
     transform(cpy.begin(), cpy.end(), cpy.begin(), ::toupper);
@@ -94,8 +100,8 @@ string Utils::toUpperString(string s)
 }
 
 //-----------------------------------------------------------------------------
-//! Utils::trims a string at the end
-string Utils::trimString(const string& s, const string& drop)
+//! trims a string at the end
+string trimString(const string& s, const string& drop)
 {
     string r = s;
     r        = r.erase(r.find_last_not_of(drop) + 1);
@@ -103,9 +109,9 @@ string Utils::trimString(const string& s, const string& drop)
 }
 //-----------------------------------------------------------------------------
 //! Splits an input string at a delimeter character into a string vector
-void Utils::splitString(const string&   s,
-                        char            delimiter,
-                        vector<string>& splits)
+void splitString(const string&   s,
+                 char            delimiter,
+                 vector<string>& splits)
 {
     string::size_type i = 0;
     string::size_type j = s.find(delimiter);
@@ -121,9 +127,9 @@ void Utils::splitString(const string&   s,
 }
 //-----------------------------------------------------------------------------
 //! Replaces in the source string the from string by the to string
-void Utils::replaceString(string&       source,
-                          const string& from,
-                          const string& to)
+void replaceString(string&       source,
+                   const string& from,
+                   const string& to)
 {
     // Code from: http://stackoverflow.com/questions/2896600/
     // how-to-replace-all-occurrences-of-a-character-in-string
@@ -146,7 +152,7 @@ void Utils::replaceString(string&       source,
 }
 //-----------------------------------------------------------------------------
 //! deletes non-filename characters: /\|?%*:"<>'
-string Utils::replaceNonFilenameChars(string src, const char replaceChar)
+string replaceNonFilenameChars(string src, const char replaceChar)
 {
     std::replace(src.begin(), src.end(), '/', replaceChar);
     std::replace(src.begin(), src.end(), '\\', replaceChar);
@@ -160,7 +166,7 @@ string Utils::replaceNonFilenameChars(string src, const char replaceChar)
 }
 //-----------------------------------------------------------------------------
 //! Returns local time as string like "Wed Feb 13 15:46:11 2019"
-string Utils::getLocalTimeString()
+string getLocalTimeString()
 {
     time_t tm;
     time(&tm);
@@ -171,7 +177,7 @@ string Utils::getLocalTimeString()
 }
 //-----------------------------------------------------------------------------
 //! Returns local time as string like "13.02.19-15:46"
-string Utils::getDateTime1String()
+string getDateTime1String()
 {
     time_t tm;
     time(&tm);
@@ -190,7 +196,7 @@ string Utils::getDateTime1String()
 }
 //-----------------------------------------------------------------------------
 //! Returns local time as string like "20190213-154611"
-string Utils::getDateTime2String()
+string getDateTime2String()
 {
     time_t tm;
     time(&tm);
@@ -210,13 +216,13 @@ string Utils::getDateTime2String()
 }
 //-----------------------------------------------------------------------------
 //! Returns the hostname from boost asio
-string Utils::getHostName()
+string getHostName()
 {
     return asio::ip::host_name();
 }
 //-----------------------------------------------------------------------------
 //! Returns a formatted string as sprintf
-string Utils::formatString(const string& fmt_str, ...)
+string formatString(const string& fmt_str, ...)
 {
     // Reserve two times as much as the length of the fmt_str
     int                final_n, n = ((int)fmt_str.size()) * 2;
@@ -239,13 +245,13 @@ string Utils::formatString(const string& fmt_str, ...)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if container contains the search string
-bool Utils::containsString(const string& container, const string& search)
+bool containsString(const string& container, const string& search)
 {
     return (container.find(search) != string::npos);
 }
 //-----------------------------------------------------------------------------
 //! Returns inputDir with unified forward slashes
-string Utils::unifySlashes(const string& inputDir)
+string unifySlashes(const string& inputDir)
 {
     string copy = inputDir;
     string curr;
@@ -268,7 +274,7 @@ string Utils::unifySlashes(const string& inputDir)
 }
 //-----------------------------------------------------------------------------
 //! Returns the path w. '\\' of path-filename string
-string Utils::getPath(const string& pathFilename)
+string getPath(const string& pathFilename)
 {
     size_t i1, i2;
     i1 = pathFilename.rfind('\\', pathFilename.length());
@@ -288,8 +294,8 @@ string Utils::getPath(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if content of file could be put in a vector of strings
-bool Utils::getFileContent(const string&   fileName,
-                           vector<string>& vecOfStrings)
+bool getFileContent(const string&   fileName,
+                    vector<string>& vecOfStrings)
 {
 
     // Open the File
@@ -341,7 +347,7 @@ z10.txt     z2.txt
 z100.txt    z10.txt
 z2.txt      z100.txt
  */
-bool Utils::compareNatural(const string& a, const string& b)
+bool compareNatural(const string& a, const string& b)
 {
     const char*          p1         = a.c_str();
     const char*          p2         = b.c_str();
@@ -457,7 +463,7 @@ bool Utils::compareNatural(const string& a, const string& b)
 
 //-----------------------------------------------------------------------------
 //! Returns the filename of path-filename string
-string Utils::getFileName(const string& pathFilename)
+string getFileName(const string& pathFilename)
 {
     size_t i1, i2;
     i1    = pathFilename.rfind('\\', pathFilename.length());
@@ -465,7 +471,7 @@ string Utils::getFileName(const string& pathFilename)
     int i = -1;
 
     if (i1 != string::npos && i2 != string::npos)
-        i = max(i1, i2);
+        i = std::max(i1, i2);
     else if (i1 != string::npos)
         i = i1;
     else if (i2 != string::npos)
@@ -475,7 +481,7 @@ string Utils::getFileName(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the filename without extension
-string Utils::getFileNameWOExt(const string& pathFilename)
+string getFileNameWOExt(const string& pathFilename)
 {
     string filename = getFileName(pathFilename);
     size_t i;
@@ -489,7 +495,7 @@ string Utils::getFileNameWOExt(const string& pathFilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the file extension without dot in lower case
-string Utils::getFileExt(const string& filename)
+string getFileExt(const string& filename)
 {
     size_t i;
     i = filename.rfind('.', filename.length());
@@ -499,7 +505,7 @@ string Utils::getFileExt(const string& filename)
 }
 //-----------------------------------------------------------------------------
 //! Returns a vector of storted filesnames with path in dir
-vector<string> Utils::getFileNamesInDir(const string& dirName)
+vector<string> getFileNamesInDir(const string& dirName)
 {
     vector<string> filePathNames;
 
@@ -537,12 +543,14 @@ vector<string> Utils::getFileNamesInDir(const string& dirName)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if a directory exists.
-bool Utils::dirExists(const string& path)
+bool dirExists(const string& path)
 {
 #if defined(USE_STD_FILESYSTEM)
     return fs::exists(path) && fs::is_directory(path);
 #else
-    struct stat info{};
+    struct stat info
+    {
+    };
     if (stat(path.c_str(), &info) != 0)
         return false;
     else if (info.st_mode & S_IFDIR)
@@ -553,7 +561,7 @@ bool Utils::dirExists(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Creates a directory with given path
-bool Utils::makeDir(const string& path)
+bool makeDir(const string& path)
 {
 #if defined(USE_STD_FILESYSTEM)
     return fs::create_directories(path);
@@ -569,7 +577,7 @@ bool Utils::makeDir(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Removes a directory with given path
-void Utils::removeDir(const string& path)
+void removeDir(const string& path)
 {
 
 #if defined(USE_STD_FILESYSTEM)
@@ -590,18 +598,20 @@ void Utils::removeDir(const string& path)
 }
 //-----------------------------------------------------------------------------
 //! Returns true if a file exists.
-bool Utils::fileExists(const string& pathfilename)
+bool fileExists(const string& pathfilename)
 {
 #if defined(USE_STD_FILESYSTEM)
     return fs::exists(pathfilename);
 #else
-    struct stat info{};
+    struct stat info
+    {
+    };
     return (stat(pathfilename.c_str(), &info) == 0);
 #endif
 }
 //-----------------------------------------------------------------------------
 //! Returns the file size in bytes
-unsigned int Utils::getFileSize(const string& pathfilename)
+unsigned int getFileSize(const string& pathfilename)
 {
 #if defined(USE_STD_FILESYSTEM)
     if (fs::exists(pathfilename))
@@ -609,7 +619,9 @@ unsigned int Utils::getFileSize(const string& pathfilename)
     else
         return 0;
 #else
-    struct stat st{};
+    struct stat st
+    {
+    };
     if (stat(pathfilename.c_str(), &st) != 0)
         return 0;
     return (unsigned int)st.st_size;
@@ -617,12 +629,12 @@ unsigned int Utils::getFileSize(const string& pathfilename)
 }
 //-----------------------------------------------------------------------------
 //! Returns the writable configuration directory with trailing forward slash
-string Utils::getAppsWritableDir()
+string getAppsWritableDir()
 {
 #if defined(_WIN32)
     string appData   = getenv("APPDATA");
     string configDir = appData + "/SLProject";
-    Utils::replaceString(configDir, "\\", "/");
+    replaceString(configDir, "\\", "/");
     if (!dirExists(configDir))
         makeDir(configDir.c_str());
     return configDir + "/";
@@ -648,7 +660,7 @@ string Utils::getAppsWritableDir()
 }
 //-----------------------------------------------------------------------------
 //! Returns the working directory with forward slashes inbetween and at the end
-string Utils::getCurrentWorkingDir()
+string getCurrentWorkingDir()
 {
 #if defined(_WIN32)
 #    if defined(USE_STD_FILESYSTEM)
@@ -678,9 +690,9 @@ string Utils::getCurrentWorkingDir()
 }
 //-----------------------------------------------------------------------------
 //! Deletes a file on the filesystem
-bool Utils::deleteFile(string& pathfilename)
+bool deleteFile(string& pathfilename)
 {
-    if (Utils::fileExists(pathfilename))
+    if (fileExists(pathfilename))
         return remove(pathfilename.c_str()) != 0;
     return false;
 }
@@ -690,11 +702,8 @@ bool Utils::deleteFile(string& pathfilename)
 ///////////////////////
 
 //-----------------------------------------------------------------------------
-string Utils::logAppName = "";
-//-----------------------------------------------------------------------------
 //! logs a formatted string platform independently
-void Utils::log(const char* format,
-                ...)
+void log(const char* format, ...)
 {
     char    log[4096];
     va_list argptr;
@@ -710,9 +719,9 @@ void Utils::log(const char* format,
 }
 //-----------------------------------------------------------------------------
 //! Terminates the application with a message. No leak checking.
-void Utils::exitMsg(const char* msg,
-                    const int   line,
-                    const char* file)
+void exitMsg(const char* msg,
+             const int   line,
+             const char* file)
 {
 #if defined(ANDROID) || defined(ANDROID_NDK)
     __android_log_print(ANDROID_LOG_INFO,
@@ -733,9 +742,9 @@ void Utils::exitMsg(const char* msg,
 }
 //-----------------------------------------------------------------------------
 //! Warn message output
-void Utils::warnMsg(const char* msg,
-                    const int   line,
-                    const char* file)
+void warnMsg(const char* msg,
+             const int   line,
+             const char* file)
 {
 #if defined(ANDROID) || defined(ANDROID_NDK)
     __android_log_print(ANDROID_LOG_INFO,
@@ -754,12 +763,12 @@ void Utils::warnMsg(const char* msg,
 }
 //-----------------------------------------------------------------------------
 //! Returns in release config the max. NO. of threads otherwise 1
-unsigned int Utils::maxThreads()
+unsigned int maxThreads()
 {
 #ifdef _DEBUG
     return 1;
 #else
-    return max(thread::hardware_concurrency(), 1U);
+    return std::max(thread::hardware_concurrency(), 1U);
 #endif
 }
 
@@ -770,13 +779,13 @@ unsigned int Utils::maxThreads()
 /*! Downloads the file at httpURL with the same name in the outFolder. If the
 outFolder is empty it is stored in the current working directory.
 */
-uint64_t Utils::httpGet(const string& httpURL, const string& outFolder)
+uint64_t httpGet(const string& httpURL, const string& outFolder)
 {
     try
     {
         // Remove "http://"
         string url = httpURL;
-        Utils::replaceString(url, "http://", "");
+        replaceString(url, "http://", "");
 
         // Get server name and get command
         string serverName  = url.substr(0, url.find('/'));
@@ -920,3 +929,5 @@ uint64_t Utils::httpGet(const string& httpURL, const string& outFolder)
     return 0;
 }
 //-----------------------------------------------------------------------------
+
+};
