@@ -15,6 +15,7 @@
 #include <functional>
 #include <thread>
 
+using namespace std;
 using namespace std::chrono;
 
 typedef std::chrono::high_resolution_clock             HighResClock;

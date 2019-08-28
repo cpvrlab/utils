@@ -124,8 +124,7 @@ bool deleteFile(string& pathfilename);
 ///////////////////////
 
 //! logs a formatted string platform independently
-void log(const char* format,
-         ...);
+void log(const char* format, ...);
 
 //! Terminates the application with a message. No leak cheching.
 [[noreturn]] void exitMsg(const char* appString,
