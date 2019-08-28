@@ -11,11 +11,14 @@
 #ifndef AVERAGED_H
 #define AVERAGED_H
 
+#include <vector>
+using namespace std;
+
 //-----------------------------------------------------------------------------
 //!Averaged template class provides an average value from a fixed size array.
 /*!The SLAverage template class provides an average value continuously averaged 
 from a fixed size vector. The template class can be used for any template type
-T that provides the following operators: =,-=,+=,T*float
+T that provides the following operators: =,-,+,T*float
 */
 template<class T>
 class Averaged
@@ -45,10 +48,10 @@ class Averaged
             _currentValueNo = 0;
 
         // Correct the sum continuosly
-        _sum -= _values[_currentValueNo];
+        _sum                     = _sum - _values[_currentValueNo];
         _values[_currentValueNo] = value;
-        _sum += _values[_currentValueNo];
-        _average = _sum * _oneOverNumValues; // avoid division
+        _sum                     = _sum + _values[_currentValueNo];
+        _average                 = _sum * _oneOverNumValues; // avoid division
         _currentValueNo++;
     }
 
@@ -62,10 +65,10 @@ class Averaged
     T last() { return _currentValueNo > 0 ? _currentValueNo - 1 : _values.size() - 1; }
 
     private:
-    float   _oneOverNumValues;  //!< multiplier instead of devider
+    float     _oneOverNumValues;  //!< multiplier instead of devider
     vector<T> _values;            //!< value array
-    int     _currentValueNo;    //!< current value index
-    int     _currentValueCount; //!< values filled
+    int       _currentValueNo;    //!< current value index
+    int       _currentValueCount; //!< values filled
     T         _sum;               //!< sum of all values
     T         _average;           //!< average value
 };
