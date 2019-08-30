@@ -17,7 +17,15 @@
 using namespace std;
 
 //-----------------------------------------------------------------------------
-//! Utils provides static utility functions for string and file handling
+//! Utils provides utility functions
+/*!
+ Function are grouped into sections:
+ - String Handling Functions
+ - File Handling Functions
+ - Logging Functions
+ - Network Handling Functions
+ - Math Constants and Functions
+*/
 namespace Utils
 {
 ///////////////////////////////
@@ -139,6 +147,7 @@ void warnMsg(const char* appString,
 unsigned int maxThreads();
 
 
+
 ////////////////////////////////
 // Network Handling Functions //
 ////////////////////////////////
@@ -147,11 +156,19 @@ unsigned int maxThreads();
 uint64_t httpGet(const string& httpURL, const string& outFolder = "");
 
 
-////////////////////
-// Math Functions //
-////////////////////
-// clang-format off
 
+//////////////////////////////////
+// Math Constants and Functions //
+//////////////////////////////////
+
+static const float PI      = 3.14159265358979f;
+static const float RAD2DEG = 180.0f / PI;
+static const float DEG2RAD = PI / 180.0f;
+static const float TWOPI   = 2.0f * PI;
+static const float ONEOVERPI  = 1.0f / PI;  // is faster than / PI
+static const float HALFPI  = PI * 0.5f;
+
+// clang-format off
 template<class T> inline T min(T a, T b){return (a < b) ? a : b;}
 template<class T> inline T max(T a, T b){return (a > b) ? a : b;}
 template<class T> inline T min(T a, T b, T c){return (a < b && a < c) ? a : (b < c) ? b : c;}
